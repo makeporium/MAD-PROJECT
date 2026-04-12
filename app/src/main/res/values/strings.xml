@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">MAD</string>
+    <string name="urgent_help">Urgent Help</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_community">Community</string>
+    <string name="nav_calendar">Calendar</string>
+    <string name="nav_info_hub">Info Hub</string>
+    <string name="nav_events">Events</string>
 </resources>
