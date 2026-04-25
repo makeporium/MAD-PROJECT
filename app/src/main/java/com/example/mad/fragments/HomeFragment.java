@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.mad.MainActivity;
 import com.example.mad.R;
 
 public class HomeFragment extends Fragment {
@@ -19,5 +20,28 @@ public class HomeFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_home, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity == null) return;
+
+        view.findViewById(R.id.cardRecommends).setOnClickListener(v -> 
+                activity.loadFragment(new RecommendsFragment()));
+
+        view.findViewById(R.id.cardMoodCheckin).setOnClickListener(v -> 
+                activity.loadFragment(new MoodCheckinFragment()));
+
+        view.findViewById(R.id.cardAiSupport).setOnClickListener(v -> 
+                activity.loadFragment(new AiSupportFragment()));
+
+        view.findViewById(R.id.cardLearn).setOnClickListener(v -> 
+                activity.navigateToTab(R.id.nav_info_hub));
+
+        view.findViewById(R.id.cardFeaturedArticle).setOnClickListener(v -> 
+                activity.navigateToTab(R.id.nav_info_hub));
     }
 }

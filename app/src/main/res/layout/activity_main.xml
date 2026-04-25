@@ -22,18 +22,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="122dp"
-        android:background="@drawable/bg_urgent_help_label"
-        android:paddingStart="10dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="4dp"
-        android:text="@string/urgent_help"
+        android:layout_marginBottom="110dp"
+        android:background="@drawable/bg_onboarding_card"
+        android:backgroundTint="@color/urgent_bg_dark"
+        android:paddingStart="12dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="6dp"
+        android:text="URGENT HELP"
         android:textAllCaps="true"
         android:textColor="@android:color/white"
         android:textSize="11sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/fabUrgent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -41,13 +43,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="72dp"
+        android:layout_marginBottom="80dp"
         android:contentDescription="@string/urgent_help"
+        android:visibility="gone"
         app:backgroundTint="@color/urgent_red"
-        app:fabCustomSize="62dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:fabCustomSize="64dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:maxImageSize="24dp"
+        app:maxImageSize="32dp"
         app:srcCompat="@android:drawable/ic_dialog_alert"
         app:tint="@android:color/white" />
 
@@ -57,12 +60,13 @@
         android:layout_height="wrap_content"
         android:background="@android:color/white"
         app:itemActiveIndicatorStyle="@style/Widget.Mad.NavIndicator"
-        app:itemIconTint="@color/nav_item_color"
-        app:itemTextColor="@color/nav_item_color"
+        app:itemIconTint="@color/nav_selected"
+        app:itemTextColor="@color/nav_selected"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/menu_bottom_nav" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,24 +12,27 @@ import androidx.fragment.app.Fragment;
 
 import com.example.mad.R;
 
-public class EventsFragment extends Fragment {
+public class AiSupportFragment extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_events, container, false);
+        return inflater.inflate(R.layout.fragment_ai_support, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        view.findViewById(R.id.btnCloseChat).setOnClickListener(v -> {
+            if (getActivity() != null) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
 
-        view.findViewById(R.id.btnJoinSession).setOnClickListener(v -> 
-            Toast.makeText(getContext(), "Joining session... Please wait.", Toast.LENGTH_SHORT).show());
-
-        view.findViewById(R.id.btnBookSession).setOnClickListener(v -> 
-            Toast.makeText(getContext(), "Redirecting to booking calendar...", Toast.LENGTH_SHORT).show());
+        view.findViewById(R.id.btnSendAiSupport).setOnClickListener(v -> 
+            Toast.makeText(getContext(), "Message sent to AI Support", Toast.LENGTH_SHORT).show());
     }
 }

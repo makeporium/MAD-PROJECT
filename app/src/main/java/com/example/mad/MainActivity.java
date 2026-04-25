@@ -1,7 +1,9 @@
 package com.example.mad;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +15,7 @@ import com.example.mad.fragments.EventsFragment;
 import com.example.mad.fragments.HomeFragment;
 import com.example.mad.fragments.InfoHubFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,11 +26,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         TextView urgentHelpButton = findViewById(R.id.tvUrgentHelp);
+        FloatingActionButton fabUrgent = findViewById(R.id.fabUrgent);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
 
-        urgentHelpButton.setOnClickListener(v -> {
-            // Hook emergency action here (call, SOS screen, etc.).
-        });
+        View.OnClickListener urgentListener = v -> {
+            Toast.makeText(this, "Emergency support is being notified...", Toast.LENGTH_LONG).show();
+            // In a real app, this would trigger an SOS alert or call.
+        };
+
+        urgentHelpButton.setOnClickListener(urgentListener);
+        fabUrgent.setOnClickListener(urgentListener);
 
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
@@ -55,10 +63,16 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void loadFragment(Fragment fragment) {
+    public void loadFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragmentContainer, fragment)
+                .addToBackStack(null)
                 .commit();
+    }
+
+    public void navigateToTab(int itemId) {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
+        bottomNavigationView.setSelectedItemId(itemId);
     }
 }

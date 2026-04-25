@@ -2,16 +2,55 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="surface_background">#F3EEE9</color>
-    <color name="card_background">#F8F8F8</color>
-    <color name="brown_primary">#9D734F</color>
-    <color name="brown_deep">#62351D</color>
-    <color name="nav_selected">#9D734F</color>
-    <color name="nav_unselected">#B8A99A</color>
+    
+    <!-- Mother's Nest Palette -->
+    <color name="primary_terracotta">#C57E65</color> <!-- Header and primary cards -->
+    <color name="bg_cream">#FAF7F2</color> <!-- General background -->
+    <color name="card_white">#FFFFFF</color>
+    <color name="text_dark">#4A3B33</color>
+    <color name="text_muted">#8A7A71</color>
+    <color name="button_dark">#9C5B48</color>
+    
+    <!-- Dashboard Specific -->
+    <color name="card_recommend_bg">#9C5B48</color>
+    <color name="checkin_grad_start">#F9C1C1</color>
+    <color name="checkin_grad_mid">#F9E4B1</color>
+    <color name="checkin_grad_end">#BFE4D8</color>
+    <color name="ai_support_bg">#A37F5F</color>
+    <color name="learn_bg">#3D72A8</color>
+    <color name="affirmation_bg">#E0D1B9</color>
+    
+    <!-- Mood Chart -->
+    <color name="mood_yellow">#F2E59E</color>
+    <color name="mood_orange">#F9DAC1</color>
+    <color name="mood_green">#CFE7D0</color>
+    
+    <!-- Community & Alerts -->
+    <color name="banner_green">#D9EDD9</color>
+    <color name="accent_green">#7BA87B</color>
     <color name="urgent_red">#CC4338</color>
-    <color name="green_soft">#CFE7D0</color>
-    <color name="mint_soft">#C5E8E3</color>
-    <color name="yellow_soft">#E8D89A</color>
-    <color name="pink_soft">#EEC1C8</color>
-    <color name="blue_soft">#4D7FB8</color>
+    <color name="urgent_bg_dark">#3F2E28</color>
+
+    <!-- Support Colors (Legacy fixes) -->
+    <color name="mint_soft">#BFE4D8</color>
+    <color name="pink_soft">#F9C1C1</color>
+    <color name="green_soft">#D9EDD9</color>
+    <color name="brown_primary">#C57E65</color>
+    
+    <!-- Topic Chip Colors -->
+    <color name="chip_ppd">#F9C1C1</color>
+    <color name="chip_coping">#D9EDD9</color>
+    <color name="chip_partner">#F9DAC1</color>
+    <color name="chip_sleep">#BFE4D8</color>
+    <color name="chip_feeding">#F2E59E</color>
+    <color name="chip_selfcare">#E0D1B9</color>
+    
+    <!-- Navigation -->
+    <color name="nav_selected">@color/primary_terracotta</color>
+
+    <color name="nav_unselected">#8A7A71</color>
+
+    <!-- Legacy/Aliases -->
+    <color name="surface_background">@color/bg_cream</color>
+    <color name="brown_deep">@color/text_dark</color>
 </resources>
