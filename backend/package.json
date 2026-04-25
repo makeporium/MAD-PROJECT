@@ -1,0 +1,32 @@
+{
+  "name": "mad-backend",
+  "version": "1.0.0",
+  "description": "Backend APIs for MAD Android app",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "db:init": "node src/scripts/initDb.js",
+    "db:seed": "node src/scripts/seedDb.js"
+  },
+  "keywords": [
+    "express",
+    "mysql",
+    "firebase"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.8.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.2",
+    "sequelize": "^6.37.8",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
