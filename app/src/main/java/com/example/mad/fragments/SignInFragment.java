@@ -133,17 +133,17 @@ public class SignInFragment extends Fragment {
             BackendClient.exchangeGoogleToken(idToken, new BackendClient.AuthCallback() {
                 @Override
                 public void onSuccess(String accessToken) {
-                    if (getActivity() == null) return;
+                    Activity activity = getActivity();
+                    if (activity == null) return;
                     BackendClient.saveAccessToken(requireContext(), accessToken);
-                    getActivity().runOnUiThread(() -> {
-                        ((MainActivity) getActivity()).onAuthSuccess();
-                    });
+                    activity.runOnUiThread(() -> ((MainActivity) activity).onAuthSuccess());
                 }
 
                 @Override
                 public void onError(String message) {
-                    if (getActivity() == null) return;
-                    getActivity().runOnUiThread(() ->
+                    Activity activity = getActivity();
+                    if (activity == null) return;
+                    activity.runOnUiThread(() ->
                             Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show());
                 }
             });
