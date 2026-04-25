@@ -35,6 +35,7 @@
         android:src="@mipmap/ic_launcher" />
 
     <SeekBar
+        android:id="@+id/seekMoodLevel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"

@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -38,6 +39,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.firebase:firebase-auth:23.2.0")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -115,17 +115,19 @@
 
             <!-- Login Button -->
             <Button
+                android:id="@+id/btnGoogleSignIn"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="32dp"
                 android:background="@drawable/bg_button_primary"
-                android:text="Log In →"
+                android:text="Continue with Google"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 app:backgroundTint="@null" />
 
             <TextView
+                android:id="@+id/tvGoToSignup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"

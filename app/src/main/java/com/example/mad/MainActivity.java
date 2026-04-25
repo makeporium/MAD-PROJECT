@@ -14,6 +14,8 @@ import com.example.mad.fragments.CommunityFragment;
 import com.example.mad.fragments.EventsFragment;
 import com.example.mad.fragments.HomeFragment;
 import com.example.mad.fragments.InfoHubFragment;
+import com.example.mad.fragments.SignInFragment;
+import com.example.mad.network.BackendClient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -38,7 +40,13 @@ public class MainActivity extends AppCompatActivity {
         fabUrgent.setOnClickListener(urgentListener);
 
         if (savedInstanceState == null) {
-            loadFragment(new HomeFragment());
+            if (BackendClient.hasAccessToken(this)) {
+                showMainUi();
+                loadFragment(new HomeFragment());
+            } else {
+                hideMainUi();
+                loadFragment(new SignInFragment());
+            }
         }
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -61,6 +69,23 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    public void onAuthSuccess() {
+        showMainUi();
+        loadFragment(new HomeFragment());
+    }
+
+    private void showMainUi() {
+        findViewById(R.id.bottomNavigation).setVisibility(View.VISIBLE);
+        findViewById(R.id.tvUrgentHelp).setVisibility(View.VISIBLE);
+        findViewById(R.id.fabUrgent).setVisibility(View.VISIBLE);
+    }
+
+    private void hideMainUi() {
+        findViewById(R.id.bottomNavigation).setVisibility(View.GONE);
+        findViewById(R.id.tvUrgentHelp).setVisibility(View.GONE);
+        findViewById(R.id.fabUrgent).setVisibility(View.GONE);
     }
 
     public void loadFragment(Fragment fragment) {

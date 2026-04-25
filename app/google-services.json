@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "263635838007",
+    "project_id": "mother-s-nest-fb12f",
+    "storage_bucket": "mother-s-nest-fb12f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:263635838007:android:2894cb83fa1dcd25e18bb2",
+        "android_client_info": {
+          "package_name": "com.example.mad"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "263635838007-e6t3stn259bmelcd9275opmd2fai2o7j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mad",
+            "certificate_hash": "c1465cf64bdcbaf82c245a69d590dc70c451da30"
+          }
+        },
+        {
+          "client_id": "263635838007-tttn1pe7aurp2fh1so6ce01q7fb6tg74.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuBnlIvXP4tWk9-IqicogcCsdfxwmeBI0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "263635838007-tttn1pe7aurp2fh1so6ce01q7fb6tg74.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

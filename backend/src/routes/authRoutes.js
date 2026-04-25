@@ -33,7 +33,14 @@ router.post("/google", async (req, res) => {
     if (error.name === "ZodError") {
       return res.status(400).json({ message: "Invalid request body" });
     }
-    return res.status(401).json({ message: "Firebase authentication failed" });
+    console.error("Auth /google failed:");
+    console.error("name:", error.name);
+    console.error("message:", error.message);
+    console.error("stack:", error.stack);
+    return res.status(401).json({
+      message: "Firebase authentication failed",
+      errorDetail: error.message,
+    });
   }
 });
 
