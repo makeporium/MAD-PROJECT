@@ -18,6 +18,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginTop="40dp"
+            android:contentDescription="@string/app_name"
             android:src="@drawable/ic_heart"
             app:tint="@color/primary_terracotta" />
 
@@ -26,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:fontFamily="serif"
-            android:text="Mother's Nest"
+            android:text="@string/mothers_nest"
             android:textColor="@color/text_dark"
             android:textSize="28sp"
             android:textStyle="bold" />
@@ -35,7 +36,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/bg_onboarding_card"
             android:elevation="2dp"
             android:orientation="vertical"
@@ -45,7 +46,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="serif"
-                android:text="Create Account"
+                android:text="@string/create_account"
                 android:textColor="@color/text_dark"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -54,7 +55,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Join our supportive community"
+                android:text="@string/join_community"
                 android:textColor="@color/text_muted"
                 android:textSize="14sp" />
 
@@ -63,21 +64,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Email Address"
+                android:text="@string/email_address"
                 android:textColor="@color/text_dark"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
             <EditText
+                android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="8dp"
+                android:autofillHints="emailAddress"
                 android:background="@drawable/bg_onboarding_card"
-                android:backgroundTint="#F0EBE5"
+                android:backgroundTint="#EAE4DE"
                 android:hint="mama@example.com"
                 android:inputType="textEmailAddress"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="#756961"
                 android:textSize="14sp" />
 
             <!-- Password Field -->
@@ -85,35 +90,62 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Password"
+                android:text="@string/password"
                 android:textColor="@color/text_dark"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
             <EditText
+                android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="8dp"
+                android:autofillHints="password"
                 android:background="@drawable/bg_onboarding_card"
-                android:backgroundTint="#F0EBE5"
+                android:backgroundTint="#EAE4DE"
                 android:hint="••••••••"
                 android:inputType="textPassword"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="#756961"
                 android:textSize="14sp" />
 
-            <!-- Signup Button -->
+            <!-- Email Signup Button -->
             <Button
-                android:id="@+id/btnGoogleSignup"
+                android:id="@+id/btnSignup"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="24dp"
                 android:background="@drawable/bg_button_primary"
-                android:text="Create account with Google"
+                android:text="@string/sign_up"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 app:backgroundTint="@null" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:text="@string/or_divider"
+                android:textColor="@color/text_dark"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- Google Signup Button -->
+            <Button
+                android:id="@+id/btnGoogleSignup"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_onboarding_card"
+                android:backgroundTint="#FFFFFF"
+                android:text="@string/continue_with_google"
+                android:textAllCaps="false"
+                android:textColor="@color/text_dark"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/tvGoToSignin"
@@ -121,7 +153,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="20dp"
-                android:text="Already have an account? Log in"
+                android:text="@string/already_have_account"
                 android:textColor="@color/primary_terracotta"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -133,7 +165,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:gravity="center"
-            android:text="By signing up, you agree to our\nPrivacy Policy and Terms of Service"
+            android:text="@string/privacy_terms"
             android:textColor="@color/text_muted"
             android:textSize="12sp" />
 

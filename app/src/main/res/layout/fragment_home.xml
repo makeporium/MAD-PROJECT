@@ -23,7 +23,7 @@
             android:paddingBottom="40dp">
 
             <TextView
-                android:id="@+id/tvHomeWelcome"
+                android:id="@+id/tvWelcomeName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="serif"
@@ -157,7 +157,7 @@
                 app:tint="@color/urgent_red" />
         </RelativeLayout>
 
-        <!-- Mood Pattern Widget -->
+        <!-- Mood Pattern Widget with Line Chart -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -177,79 +177,17 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <!-- Bar Chart Mock -->
-            <LinearLayout
+            <!-- Line Chart -->
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/moodLineChart"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:layout_marginTop="24dp"
-                android:gravity="bottom"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="bottom|center_horizontal"
-                    android:orientation="vertical">
-                    <View
-                        android:layout_width="70dp"
-                        android:layout_height="80dp"
-                        android:background="@drawable/bg_onboarding_card"
-                        android:backgroundTint="@color/mood_yellow" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Dec 1"
-                        android:textColor="@color/text_muted"
-                        android:textSize="10sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="bottom|center_horizontal"
-                    android:orientation="vertical">
-                    <View
-                        android:layout_width="70dp"
-                        android:layout_height="50dp"
-                        android:background="@drawable/bg_onboarding_card"
-                        android:backgroundTint="@color/mood_orange" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Dec 2"
-                        android:textColor="@color/text_muted"
-                        android:textSize="10sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="bottom|center_horizontal"
-                    android:orientation="vertical">
-                    <View
-                        android:layout_width="70dp"
-                        android:layout_height="100dp"
-                        android:background="@drawable/bg_onboarding_card"
-                        android:backgroundTint="@color/mood_green" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Dec 3"
-                        android:textColor="@color/text_muted"
-                        android:textSize="10sp" />
-                </LinearLayout>
-            </LinearLayout>
+                android:layout_height="200dp"
+                android:layout_marginTop="16dp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:text="Tracking your emotions helps you understand yourself better"
                 android:textColor="@color/text_muted"
                 android:textSize="14sp" />
@@ -403,8 +341,9 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Affirmation Card -->
+        <!-- Testimonials Card (replaces Affirmation) -->
         <LinearLayout
+            android:id="@+id/cardTestimonials"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
@@ -412,7 +351,6 @@
             android:layout_marginEnd="20dp"
             android:background="@drawable/bg_onboarding_card"
             android:backgroundTint="@color/affirmation_bg"
-            android:gravity="center_horizontal"
             android:orientation="vertical"
             android:padding="28dp">
 
@@ -420,22 +358,50 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="serif"
-                android:gravity="center"
-                android:text="&quot;You are enough, exactly as you are. Your feelings are valid, and asking for help is a sign of strength.&quot;"
+                android:text="@string/testimonials_title"
                 android:textColor="@color/text_dark"
-                android:textSize="16sp"
-                android:textStyle="italic" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="❝"
+                android:textColor="@color/primary_terracotta"
+                android:textSize="32sp" />
+
+            <TextView
+                android:id="@+id/tvTestimonialQuote"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="serif"
+                android:text="This app made me realize I'm not alone in this journey. The community here truly understands."
+                android:textColor="@color/text_dark"
+                android:textSize="15sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/tvTestimonialAuthor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Today's affirmation"
+                android:text="— Ananya, Mother of 1"
                 android:textColor="@color/text_muted"
-                android:textSize="12sp" />
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="12dp"
+                android:text="@string/tap_next"
+                android:textColor="@color/primary_terracotta"
+                android:textSize="12sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
-
-

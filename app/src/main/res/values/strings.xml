@@ -6,4 +6,49 @@
     <string name="nav_calendar">Calendar</string>
     <string name="nav_info_hub">Info Hub</string>
     <string name="nav_events">Events</string>
+
+    <!-- Profile Drawer -->
+    <string name="profile_title">My Profile</string>
+    <string name="first_name">First Name</string>
+    <string name="surname">Surname</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="email">Email</string>
+    <string name="save_profile">Save Profile</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="sign_out_confirm_title">Sign Out</string>
+    <string name="sign_out_confirm_message">Are you sure you want to sign out?</string>
+    <string name="sign_out_success">Signed out successfully</string>
+    <string name="profile_saved">Profile saved successfully ✓</string>
+
+    <!-- Testimonials -->
+    <string name="testimonials_title">What Mothers Say</string>
+    <string name="tap_next">Tap for next →</string>
+    <string name="welcome_back">Welcome back, %1$s</string>
+
+    <!-- Auth Screens -->
+    <string name="welcome_back_title">Welcome Back</string>
+    <string name="mothers_nest">Mother\'s Nest</string>
+    <string name="create_account">Create Account</string>
+    <string name="join_community">Join our supportive community</string>
+    <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="or_divider">OR</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="dont_have_account">Don\'t have an account? Sign up</string>
+    <string name="already_have_account">Already have an account? Log in</string>
+    <string name="privacy_terms">By signing up, you agree to our\nPrivacy Policy and Terms of Service</string>
+    <string name="auth_quote">\"Take a deep breath. You are doing a great job.\"</string>
+
+    <!-- Auth Toasts -->
+    <string name="fill_fields">Please fill all fields</string>
+    <string name="auth_failed">Authentication failed: %1$s</string>
+    <string name="registration_failed">Registration failed: %1$s</string>
+    <string name="google_cancelled">Google sign-in cancelled</string>
+    <string name="google_failed">Google sign-in failed</string>
+    <string name="firebase_failed">Firebase login failed</string>
+    <string name="token_error">Could not get security token</string>
+    <string name="password_too_short">Password must be at least 6 characters</string>
 </resources>

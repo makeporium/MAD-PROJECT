@@ -18,6 +18,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginTop="40dp"
+            android:contentDescription="@string/app_name"
             android:src="@drawable/ic_heart"
             app:tint="@color/primary_terracotta" />
 
@@ -26,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:fontFamily="serif"
-            android:text="Welcome Back"
+            android:text="@string/welcome_back_title"
             android:textColor="@color/text_dark"
             android:textSize="28sp"
             android:textStyle="bold" />
@@ -45,7 +46,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="&quot;Take a deep breath. You are doing a great job.&quot;"
+                android:text="@string/auth_quote"
                 android:textColor="@color/text_dark"
                 android:textSize="13sp"
                 android:textStyle="italic" />
@@ -65,21 +66,25 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Email Address"
+                android:text="@string/email_address"
                 android:textColor="@color/text_dark"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
             <EditText
+                android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="8dp"
+                android:autofillHints="emailAddress"
                 android:background="@drawable/bg_onboarding_card"
-                android:backgroundTint="#F0EBE5"
+                android:backgroundTint="#EAE4DE"
                 android:hint="mama@example.com"
                 android:inputType="textEmailAddress"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="#756961"
                 android:textSize="14sp" />
 
             <!-- Password Field -->
@@ -87,21 +92,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Password"
+                android:text="@string/password"
                 android:textColor="@color/text_dark"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
             <EditText
+                android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="8dp"
+                android:autofillHints="password"
                 android:background="@drawable/bg_onboarding_card"
-                android:backgroundTint="#F0EBE5"
+                android:backgroundTint="#EAE4DE"
                 android:hint="••••••••"
                 android:inputType="textPassword"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="#756961"
                 android:textSize="14sp" />
 
             <TextView
@@ -109,22 +118,45 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="8dp"
-                android:text="Forgot Password?"
+                android:text="@string/forgot_password"
                 android:textColor="@color/primary_terracotta"
                 android:textSize="12sp" />
 
-            <!-- Login Button -->
+            <!-- Email Login Button -->
             <Button
-                android:id="@+id/btnGoogleSignIn"
+                android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="24dp"
                 android:background="@drawable/bg_button_primary"
-                android:text="Continue with Google"
+                android:text="@string/login"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 app:backgroundTint="@null" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:text="@string/or_divider"
+                android:textColor="@color/text_dark"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- Google Login Button -->
+            <Button
+                android:id="@+id/btnGoogleSignIn"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_onboarding_card"
+                android:backgroundTint="#FFFFFF"
+                android:text="@string/continue_with_google"
+                android:textAllCaps="false"
+                android:textColor="@color/text_dark"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/tvGoToSignup"
@@ -132,7 +164,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="20dp"
-                android:text="Don't have an account? Sign up"
+                android:text="@string/dont_have_account"
                 android:textColor="@color/primary_terracotta"
                 android:textSize="14sp"
                 android:textStyle="bold" />
