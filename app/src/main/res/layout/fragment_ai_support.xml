@@ -81,6 +81,7 @@
         app:layout_constraintTop_toBottomOf="@id/profileBanner">
 
         <LinearLayout
+            android:id="@+id/aiMessagesContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -122,6 +123,7 @@
             android:orientation="horizontal">
 
             <EditText
+                android:id="@+id/etAiMessage"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"

@@ -188,6 +188,7 @@
         app:layout_constraintTop_toBottomOf="@id/messagesContainer">
 
         <EditText
+            android:id="@+id/etChatMessage"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="1"

@@ -3,9 +3,13 @@ package com.example.mad.network;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 import okhttp3.MediaType;
 import okhttp3.Call;
@@ -37,6 +41,16 @@ public class BackendClient {
 
     public interface SimpleCallback {
         void onSuccess(String message);
+        void onError(String message);
+    }
+
+    public interface JsonCallback {
+        void onSuccess(JSONArray data);
+        void onError(String message);
+    }
+
+    public interface ObjectCallback {
+        void onSuccess(JSONObject data);
         void onError(String message);
     }
 
@@ -140,6 +154,109 @@ public class BackendClient {
         prefs.edit().remove(KEY_ACCESS_TOKEN).apply();
     }
 
+    public static Request.Builder authorizedBuilder(Context context, String path) {
+        String token = getAccessToken(context);
+        return new Request.Builder()
+                .url(BASE_URL + path)
+                .addHeader("Authorization", "Bearer " + token);
+    }
+
+    public static void getRecommendations(Context context, JsonCallback callback) {
+        makeAuthorizedGetArray(context, "/api/recommends", callback);
+    }
+
+    public static void getEvents(Context context, JsonCallback callback) {
+        makeAuthorizedGetArray(context, "/api/events", callback);
+    }
+
+    public static void getResources(Context context, String topic, JsonCallback callback) {
+        String path = "/api/resources";
+        if (topic != null && !topic.isEmpty()) {
+            path += "?topic=" + topic;
+        }
+        makeAuthorizedGetArray(context, path, callback);
+    }
+
+    public static void getCommunityRooms(Context context, JsonCallback callback) {
+        makeAuthorizedGetArray(context, "/api/community/rooms", callback);
+    }
+
+    public static void getRoomMessages(Context context, long roomId, JsonCallback callback) {
+        makeAuthorizedGetArray(context, "/api/community/rooms/" + roomId + "/messages", callback);
+    }
+
+    public static void sendRoomMessage(Context context, long roomId, String message, SimpleCallback callback) {
+        try {
+            JSONObject bodyJson = new JSONObject();
+            bodyJson.put("message", message);
+            Request request = authorizedBuilder(context, "/api/community/rooms/" + roomId + "/messages")
+                    .post(RequestBody.create(bodyJson.toString(), JSON))
+                    .build();
+            executeSimpleRequest(request, callback);
+        } catch (Exception e) {
+            callback.onError("Client error: " + e.getMessage());
+        }
+    }
+
+    public static void sendAiMessage(Context context, String message, ObjectCallback callback) {
+        try {
+            JSONObject bodyJson = new JSONObject();
+            bodyJson.put("user_message", message);
+            Request request = authorizedBuilder(context, "/api/support/ai")
+                    .post(RequestBody.create(bodyJson.toString(), JSON))
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    callback.onError("Network error: " + e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String raw = response.body() != null ? response.body().string() : "";
+                    response.close();
+                    if (!response.isSuccessful()) {
+                        callback.onError(extractErrorMessage(raw));
+                        return;
+                    }
+                    try {
+                        callback.onSuccess(new JSONObject(raw));
+                    } catch (Exception e) {
+                        callback.onError("Invalid backend response");
+                    }
+                }
+            });
+        } catch (Exception e) {
+            callback.onError("Client error: " + e.getMessage());
+        }
+    }
+
+    public static void sendSos(Context context, SimpleCallback callback) {
+        Request request = authorizedBuilder(context, "/api/support/sos")
+                .post(RequestBody.create("{}", JSON))
+                .build();
+        executeSimpleRequest(request, callback);
+    }
+
+    public static void createQuickReminder(Context context, String title, SimpleCallback callback) {
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.HOUR_OF_DAY, 1);
+            String remindAt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(calendar.getTime());
+            JSONObject bodyJson = new JSONObject();
+            bodyJson.put("title", title);
+            bodyJson.put("remind_at", remindAt);
+            bodyJson.put("notes", "Added from app quick action");
+            Request request = authorizedBuilder(context, "/api/reminders")
+                    .post(RequestBody.create(bodyJson.toString(), JSON))
+                    .build();
+            executeSimpleRequest(request, callback);
+        } catch (Exception e) {
+            callback.onError("Client error: " + e.getMessage());
+        }
+    }
+
     public static void saveMoodEntry(Context context, int moodLevel, String note, SimpleCallback callback) {
         try {
             String token = getAccessToken(context);
@@ -179,5 +296,65 @@ public class BackendClient {
         } catch (Exception e) {
             callback.onError("Client error: " + e.getMessage());
         }
+    }
+
+    private static void makeAuthorizedGetArray(Context context, String path, JsonCallback callback) {
+        try {
+            String token = getAccessToken(context);
+            if (token == null) {
+                callback.onError("Please sign in first");
+                return;
+            }
+
+            Request request = new Request.Builder()
+                    .url(BASE_URL + path)
+                    .addHeader("Authorization", "Bearer " + token)
+                    .get()
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    callback.onError("Network error: " + e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String raw = response.body() != null ? response.body().string() : "";
+                    response.close();
+                    if (!response.isSuccessful()) {
+                        callback.onError(extractErrorMessage(raw));
+                        return;
+                    }
+                    try {
+                        callback.onSuccess(new JSONArray(raw));
+                    } catch (Exception e) {
+                        callback.onError("Invalid backend response");
+                    }
+                }
+            });
+        } catch (Exception e) {
+            callback.onError("Client error: " + e.getMessage());
+        }
+    }
+
+    private static void executeSimpleRequest(Request request, SimpleCallback callback) {
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onError("Network error: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String raw = response.body() != null ? response.body().string() : "";
+                response.close();
+                if (response.isSuccessful()) {
+                    callback.onSuccess("Success");
+                } else {
+                    callback.onError(extractErrorMessage(raw));
+                }
+            }
+        });
     }
 }

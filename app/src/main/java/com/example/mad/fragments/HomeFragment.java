@@ -1,10 +1,11 @@
 package com.example.mad.fragments;
 
 import android.os.Bundle;
-import android.widget.Toast;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import com.example.mad.MainActivity;
 import com.example.mad.R;
 import com.example.mad.network.BackendClient;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class HomeFragment extends Fragment {
 
@@ -31,13 +33,18 @@ public class HomeFragment extends Fragment {
         MainActivity activity = (MainActivity) getActivity();
         if (activity == null) return;
 
-        // Simple backend connection check for beginners.
+        TextView tvWelcome = view.findViewById(R.id.tvHomeWelcome);
+        String name = "there";
+        if (FirebaseAuth.getInstance().getCurrentUser() != null &&
+                FirebaseAuth.getInstance().getCurrentUser().getDisplayName() != null) {
+            name = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        }
+        tvWelcome.setText("Welcome back, " + name);
+
         BackendClient.checkHealth(new BackendClient.HealthCallback() {
             @Override
             public void onSuccess() {
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "Backend connected", Toast.LENGTH_SHORT).show());
+                // Connected.
             }
 
             @Override

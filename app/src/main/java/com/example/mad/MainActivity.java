@@ -32,8 +32,19 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
 
         View.OnClickListener urgentListener = v -> {
-            Toast.makeText(this, "Emergency support is being notified...", Toast.LENGTH_LONG).show();
-            // In a real app, this would trigger an SOS alert or call.
+            BackendClient.sendSos(this, new BackendClient.SimpleCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    runOnUiThread(() ->
+                            Toast.makeText(MainActivity.this, "Emergency support notified", Toast.LENGTH_LONG).show());
+                }
+
+                @Override
+                public void onError(String message) {
+                    runOnUiThread(() ->
+                            Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show());
+                }
+            });
         };
 
         urgentHelpButton.setOnClickListener(urgentListener);

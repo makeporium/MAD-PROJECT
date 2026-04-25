@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.mad.MainActivity;
 import com.example.mad.R;
+import com.example.mad.network.BackendClient;
 
 public class CalendarFragment extends Fragment {
 
@@ -33,7 +34,21 @@ public class CalendarFragment extends Fragment {
         view.findViewById(R.id.cardDailyMood).setOnClickListener(v -> 
                 activity.loadFragment(new MoodCheckinFragment()));
 
-        view.findViewById(R.id.btnAddReminder).setOnClickListener(v -> 
-                Toast.makeText(getContext(), "Reminder feature coming soon!", Toast.LENGTH_SHORT).show());
+        view.findViewById(R.id.btnAddReminder).setOnClickListener(v ->
+                BackendClient.createQuickReminder(requireContext(), "Daily mood check-in", new BackendClient.SimpleCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), "Reminder added", Toast.LENGTH_SHORT).show());
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show());
+                    }
+                }));
     }
 }

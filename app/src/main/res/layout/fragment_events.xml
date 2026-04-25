@@ -65,6 +65,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvEventTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -136,6 +137,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvEventDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -144,6 +146,7 @@
                 android:textSize="14sp" />
 
             <TextView
+                android:id="@+id/tvEventDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"

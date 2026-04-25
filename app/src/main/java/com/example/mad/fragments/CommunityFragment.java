@@ -11,8 +11,16 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.mad.R;
+import com.example.mad.network.BackendClient;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CommunityFragment extends Fragment {
+    private final Map<String, Long> roomIdsByName = new HashMap<>();
 
     @Nullable
     @Override
@@ -25,6 +33,7 @@ public class CommunityFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        loadRooms();
 
         view.findViewById(R.id.itemNightFeeding).setOnClickListener(v -> 
             showChat("Night Feeding Support", "Share tips and support for late-night feeding"));
@@ -42,11 +51,33 @@ public class CommunityFragment extends Fragment {
             showChat("Self-Care Corner", "Tips and encouragement for taking care of yourself"));
 
         view.findViewById(R.id.cardSuggestTopic).setOnClickListener(v -> 
-            Toast.makeText(getContext(), "Thank you for your suggestion! We'll review it soon.", Toast.LENGTH_SHORT).show());
+            Toast.makeText(getContext(), "Topic suggestion saved locally", Toast.LENGTH_SHORT).show());
+    }
+
+    private void loadRooms() {
+        BackendClient.getCommunityRooms(requireContext(), new BackendClient.JsonCallback() {
+            @Override
+            public void onSuccess(JSONArray data) {
+                roomIdsByName.clear();
+                for (int i = 0; i < data.length(); i++) {
+                    JSONObject room = data.optJSONObject(i);
+                    if (room == null) continue;
+                    roomIdsByName.put(room.optString("name", ""), room.optLong("id", -1));
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show());
+            }
+        });
     }
 
     private void showChat(String title, String desc) {
-        ChatDialogFragment.newInstance(title, desc)
+        long roomId = roomIdsByName.getOrDefault(title, -1L);
+        ChatDialogFragment.newInstance(roomId, title, desc)
                 .show(getChildFragmentManager(), "chat_dialog");
     }
 }
