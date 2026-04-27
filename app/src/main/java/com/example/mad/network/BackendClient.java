@@ -27,7 +27,7 @@ public class BackendClient {
     private static final OkHttpClient client = new OkHttpClient();
     private static final String PREFS_NAME = "mad_prefs";
     private static final String KEY_ACCESS_TOKEN = "access_token";
-    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public interface HealthCallback {
         void onSuccess();
@@ -161,12 +161,81 @@ public class BackendClient {
                 .addHeader("Authorization", "Bearer " + token);
     }
 
+    public static void getProfile(Context context, ObjectCallback callback) {
+        try {
+            Request request = authorizedBuilder(context, "/api/auth/me").get().build();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) { callback.onError("Network error: " + e.getMessage()); }
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String raw = response.body() != null ? response.body().string() : "";
+                    response.close();
+                    if (!response.isSuccessful()) { callback.onError(extractErrorMessage(raw)); return; }
+                    try { callback.onSuccess(new JSONObject(raw)); } catch (Exception e) { callback.onError("Invalid backend response"); }
+                }
+            });
+        } catch (Exception e) { callback.onError("Client error: " + e.getMessage()); }
+    }
+
+    public static void getTestimonials(Context context, JsonCallback callback) {
+        makeAuthorizedGetArray(context, "/api/testimonials", callback);
+    }
+
     public static void getRecommendations(Context context, JsonCallback callback) {
         makeAuthorizedGetArray(context, "/api/recommends", callback);
     }
 
     public static void getEvents(Context context, JsonCallback callback) {
         makeAuthorizedGetArray(context, "/api/events", callback);
+    }
+
+    public static void bookSession(Context context, long eventId, SimpleCallback callback) {
+        Request request = authorizedBuilder(context, "/api/events/" + eventId + "/book")
+                .post(RequestBody.create("{}", JSON))
+                .build();
+        executeSimpleRequest(request, callback);
+    }
+
+    public static void createSession(Context context, String title, String description, String date, String joinLink, SimpleCallback callback) {
+        try {
+            JSONObject bodyJson = new JSONObject();
+            bodyJson.put("title", title);
+            bodyJson.put("description", description);
+            bodyJson.put("event_date", date);
+            bodyJson.put("join_link", joinLink);
+            Request request = authorizedBuilder(context, "/api/events")
+                    .post(RequestBody.create(bodyJson.toString(), JSON))
+                    .build();
+            executeSimpleRequest(request, callback);
+        } catch (Exception e) {
+            callback.onError(e.getMessage());
+        }
+    }
+
+    public static void getMySessions(Context context, JsonCallback callback) {
+        makeAuthorizedGetArray(context, "/api/events/my-sessions", callback);
+    }
+
+    public static void createExpertProfile(Context context, String specialty, String location, String format, String availability, String fee, SimpleCallback callback) {
+        try {
+            JSONObject bodyJson = new JSONObject();
+            bodyJson.put("specialty", specialty);
+            bodyJson.put("location", location);
+            bodyJson.put("format", format);
+            bodyJson.put("availability", availability);
+            bodyJson.put("fee", fee);
+            Request request = authorizedBuilder(context, "/api/events/expert-profile")
+                    .post(RequestBody.create(bodyJson.toString(), JSON))
+                    .build();
+            executeSimpleRequest(request, callback);
+        } catch (Exception e) {
+            callback.onError(e.getMessage());
+        }
+    }
+
+    public static void getExpertProfiles(Context context, JsonCallback callback) {
+        makeAuthorizedGetArray(context, "/api/events/expert-profiles", callback);
     }
 
     public static void getResources(Context context, String topic, JsonCallback callback) {
@@ -181,14 +250,36 @@ public class BackendClient {
         makeAuthorizedGetArray(context, "/api/community/rooms", callback);
     }
 
+    public static void createCommunityRoom(Context context, String name, String description, SimpleCallback callback) {
+        try {
+            JSONObject bodyJson = new JSONObject();
+            bodyJson.put("name", name);
+            bodyJson.put("description", description);
+            Request request = authorizedBuilder(context, "/api/community/rooms")
+                    .post(RequestBody.create(bodyJson.toString(), JSON))
+                    .build();
+            executeSimpleRequest(request, callback);
+        } catch (Exception e) {
+            callback.onError(e.getMessage());
+        }
+    }
+
+    public static void deleteCommunityRoom(Context context, long roomId, SimpleCallback callback) {
+        Request request = authorizedBuilder(context, "/api/community/rooms/" + roomId)
+                .delete()
+                .build();
+        executeSimpleRequest(request, callback);
+    }
+
     public static void getRoomMessages(Context context, long roomId, JsonCallback callback) {
         makeAuthorizedGetArray(context, "/api/community/rooms/" + roomId + "/messages", callback);
     }
 
-    public static void sendRoomMessage(Context context, long roomId, String message, SimpleCallback callback) {
+    public static void sendRoomMessage(Context context, long roomId, String message, boolean isAnonymous, SimpleCallback callback) {
         try {
             JSONObject bodyJson = new JSONObject();
             bodyJson.put("message", message);
+            bodyJson.put("isAnonymous", isAnonymous);
             Request request = authorizedBuilder(context, "/api/community/rooms/" + roomId + "/messages")
                     .post(RequestBody.create(bodyJson.toString(), JSON))
                     .build();
@@ -298,7 +389,7 @@ public class BackendClient {
         }
     }
 
-    private static void makeAuthorizedGetArray(Context context, String path, JsonCallback callback) {
+    public static void makeAuthorizedGetArray(Context context, String path, JsonCallback callback) {
         try {
             String token = getAccessToken(context);
             if (token == null) {
@@ -338,7 +429,7 @@ public class BackendClient {
         }
     }
 
-    private static void executeSimpleRequest(Request request, SimpleCallback callback) {
+    public static void executeSimpleRequest(Request request, SimpleCallback callback) {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

@@ -22,6 +22,16 @@ import java.util.Map;
 public class CommunityFragment extends Fragment {
     private final Map<String, Long> roomIdsByName = new HashMap<>();
 
+    // Auto-refresh rooms list every 5 seconds
+    private final android.os.Handler pollHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable pollRunnable = new Runnable() {
+        @Override
+        public void run() {
+            loadRooms();
+            pollHandler.postDelayed(this, 5000);
+        }
+    };
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -34,36 +44,105 @@ public class CommunityFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         loadRooms();
+        
+        // Start polling
+        pollHandler.postDelayed(pollRunnable, 5000);
 
-        view.findViewById(R.id.itemNightFeeding).setOnClickListener(v -> 
-            showChat("Night Feeding Support", "Share tips and support for late-night feeding"));
+        view.findViewById(R.id.cardSuggestTopic).setOnClickListener(v -> showCreateRoomDialog());
+    }
 
-        view.findViewById(R.id.itemFirstWeek).setOnClickListener(v -> 
-            showChat("First Week Postpartum", "For mothers in their first week after delivery"));
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Stop polling when fragment is destroyed
+        pollHandler.removeCallbacks(pollRunnable);
+    }
 
-        view.findViewById(R.id.itemFeelingLonely).setOnClickListener(v -> 
-            showChat("Feeling Lonely", "A safe space to share when you feel isolated"));
+    private void showCreateRoomDialog() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getContext());
+        builder.setTitle("Create New Chatroom");
 
-        view.findViewById(R.id.itemPartnerSupport).setOnClickListener(v -> 
-            showChat("Partner Support", "Navigating relationships during postpartum"));
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(getContext());
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        layout.setPadding(40, 20, 40, 20);
 
-        view.findViewById(R.id.itemSelfCare).setOnClickListener(v -> 
-            showChat("Self-Care Corner", "Tips and encouragement for taking care of yourself"));
+        final android.widget.EditText nameInput = new android.widget.EditText(getContext());
+        nameInput.setHint("Topic Name");
+        layout.addView(nameInput);
 
-        view.findViewById(R.id.cardSuggestTopic).setOnClickListener(v -> 
-            Toast.makeText(getContext(), "Topic suggestion saved locally", Toast.LENGTH_SHORT).show());
+        final android.widget.EditText descInput = new android.widget.EditText(getContext());
+        descInput.setHint("Topic Description");
+        layout.addView(descInput);
+
+        builder.setView(layout);
+        builder.setPositiveButton("Create", (dialog, which) -> {
+            String name = nameInput.getText().toString();
+            String desc = descInput.getText().toString();
+            if (!name.isEmpty() && !desc.isEmpty()) {
+                BackendClient.createCommunityRoom(requireContext(), name, desc, new BackendClient.SimpleCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(() -> {
+                            Toast.makeText(getContext(), "Room created", Toast.LENGTH_SHORT).show();
+                            loadRooms();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show());
+                    }
+                });
+            }
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
     }
 
     private void loadRooms() {
         BackendClient.getCommunityRooms(requireContext(), new BackendClient.JsonCallback() {
             @Override
             public void onSuccess(JSONArray data) {
-                roomIdsByName.clear();
-                for (int i = 0; i < data.length(); i++) {
-                    JSONObject room = data.optJSONObject(i);
-                    if (room == null) continue;
-                    roomIdsByName.put(room.optString("name", ""), room.optLong("id", -1));
-                }
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> {
+                    android.widget.LinearLayout container = getView().findViewById(R.id.roomsContainer);
+                    if (container == null) return;
+                    container.removeAllViews();
+                    roomIdsByName.clear();
+
+                    for (int i = 0; i < data.length(); i++) {
+                        JSONObject room = data.optJSONObject(i);
+                        if (room == null) continue;
+
+                        long roomId = room.optLong("id", -1);
+                        String name = room.optString("name", "");
+                        String description = room.optString("description", "");
+                        int count = room.optInt("participants_count", 0);
+                        String lastMsg = room.optString("last_message", "No messages yet");
+                        String lastTime = room.optString("last_message_at", "");
+                        if (lastTime.length() > 10) {
+                            lastTime = lastTime.substring(11, 16); // basic time extraction
+                        }
+                        roomIdsByName.put(name, roomId);
+
+                        View roomView = LayoutInflater.from(getContext()).inflate(R.layout.item_chatroom, container, false);
+                        ((android.widget.TextView) roomView.findViewById(R.id.tvRoomName)).setText(name);
+                        ((android.widget.TextView) roomView.findViewById(R.id.tvRoomDesc)).setText(description);
+                        ((android.widget.TextView) roomView.findViewById(R.id.tvParticipants)).setText("👥 " + count);
+                        ((android.widget.TextView) roomView.findViewById(R.id.tvLastMessage)).setText(lastMsg.isEmpty() || lastMsg.equals("null") ? "No messages yet" : "\"" + lastMsg + "\"");
+                        ((android.widget.TextView) roomView.findViewById(R.id.tvLastMessageTime)).setText(lastTime);
+
+                        roomView.setOnClickListener(v -> showChat(roomId, name, description));
+                        roomView.setOnLongClickListener(v -> {
+                            showDeleteRoomDialog(roomId, name);
+                            return true;
+                        });
+                        container.addView(roomView);
+                    }
+                });
             }
 
             @Override
@@ -75,8 +154,34 @@ public class CommunityFragment extends Fragment {
         });
     }
 
-    private void showChat(String title, String desc) {
-        long roomId = roomIdsByName.getOrDefault(title, -1L);
+    private void showDeleteRoomDialog(long roomId, String name) {
+        new android.app.AlertDialog.Builder(getContext())
+                .setTitle("Delete Topic")
+                .setMessage("Are you sure you want to delete '" + name + "'? Only the creator or an expert can do this.")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    BackendClient.deleteCommunityRoom(requireContext(), roomId, new BackendClient.SimpleCallback() {
+                        @Override
+                        public void onSuccess(String message) {
+                            if (getActivity() == null) return;
+                            getActivity().runOnUiThread(() -> {
+                                Toast.makeText(getContext(), "Room deleted", Toast.LENGTH_SHORT).show();
+                                loadRooms();
+                            });
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            if (getActivity() == null) return;
+                            getActivity().runOnUiThread(() ->
+                                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show());
+                        }
+                    });
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showChat(long roomId, String title, String desc) {
         ChatDialogFragment.newInstance(roomId, title, desc)
                 .show(getChildFragmentManager(), "chat_dialog");
     }

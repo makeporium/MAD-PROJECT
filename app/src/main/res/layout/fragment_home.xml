@@ -287,10 +287,11 @@
             android:orientation="vertical">
 
             <ImageView
+                android:id="@+id/ivFeaturedImage"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
                 android:scaleType="centerCrop"
-                android:src="@mipmap/ic_launcher" /> <!-- Placeholder for actual image -->
+                android:src="@mipmap/ic_launcher" /> <!-- Placeholder -->
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -299,6 +300,7 @@
                 android:padding="20dp">
 
                 <TextView
+                    android:id="@+id/tvFeaturedBadge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_onboarding_card"
@@ -313,6 +315,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvFeaturedTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
@@ -323,6 +326,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tvFeaturedExcerpt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -331,6 +335,7 @@
                     android:textSize="14sp" />
 
                 <TextView
+                    android:id="@+id/btnFeaturedReadMore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"

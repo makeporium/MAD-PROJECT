@@ -78,7 +78,7 @@
 
     <!-- Profile Drawer (slides from RIGHT / end) -->
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/drawerContent"
+        android:id="@+id/drawerRightContent"
         android:layout_width="320dp"
         android:layout_height="match_parent"
         android:layout_gravity="end"
@@ -110,6 +110,7 @@
                     app:tint="@color/primary_terracotta" />
 
                 <TextView
+                    android:id="@+id/tvProfileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
@@ -118,6 +119,23 @@
                     android:textColor="@color/text_dark"
                     android:textSize="22sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvRoleBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_onboarding_card"
+                    android:backgroundTint="@color/banner_green"
+                    android:paddingStart="12dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="4dp"
+                    android:text="Member"
+                    android:textColor="@color/accent_green"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
 
                 <View
                     android:layout_width="40dp"
@@ -235,6 +253,21 @@
                 android:textStyle="bold"
                 app:backgroundTint="@null" />
 
+            <!-- Manage Testimonials Button (Expert Only) -->
+            <Button
+                android:id="@+id/btnManageTestimonials"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="Manage Testimonials"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:backgroundTint="@color/banner_green" />
+
             <!-- Divider -->
             <View
                 android:layout_width="match_parent"
@@ -255,6 +288,69 @@
                 android:textColor="@color/urgent_red"
                 android:textSize="15sp"
                 android:textStyle="bold" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Other Profile Drawer (slides from LEFT / start) -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/drawerLeftContent"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/bg_cream"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Profile Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingTop="40dp"
+                android:paddingBottom="24dp">
+
+                <ImageView
+                    android:id="@+id/ivOtherProfileAvatar"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:background="@drawable/bg_circle_avatar"
+                    android:padding="20dp"
+                    android:src="@android:drawable/ic_menu_myplaces"
+                    app:tint="@color/primary_terracotta" />
+
+                <TextView
+                    android:id="@+id/tvOtherProfileName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="serif"
+                    android:text="User Profile"
+                    android:textColor="@color/text_dark"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Promote to Expert (only visible to experts) -->
+            <Button
+                android:id="@+id/btnPromoteExpert"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="✦ Make Expert"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:backgroundTint="#E65100" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

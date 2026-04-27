@@ -35,6 +35,7 @@ app.use("/api/events", eventsRoutes);
 app.use("/api/resources", resourcesRoutes);
 app.use("/api/reminders", remindersRoutes);
 app.use("/api/support", supportRoutes);
+app.use("/api/testimonials", require("./routes/testimonialsRoutes"));
 
 app.use((err, _req, res, _next) => {
   console.error("Unhandled error:", err);

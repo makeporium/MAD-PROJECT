@@ -1,214 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/bg_onboarding_card"
-    android:backgroundTint="@android:color/white"
-    android:padding="20dp">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_cream">
 
-    <View
-        android:id="@+id/handle"
-        android:layout_width="40dp"
-        android:layout_height="4dp"
-        android:background="#D1C7BD"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/chatTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:fontFamily="serif"
-        android:text="Night Feeding Support"
-        android:textColor="@color/text_dark"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/handle" />
-
-    <TextView
-        android:id="@+id/chatDesc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Share tips and support for late-night feeding"
-        android:textColor="@color/text_muted"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/chatTitle" />
-
-    <!-- Messages Container -->
+    <!-- ─── Drag Handle ──────────────────────────────────────────── -->
     <LinearLayout
-        android:id="@+id/messagesContainer"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:background="@color/bg_cream">
+        <View
+            android:id="@+id/handle"
+            android:layout_width="44dp"
+            android:layout_height="5dp"
+            android:background="#D1C7BD"
+            android:layout_gravity="center" />
+    </LinearLayout>
+
+    <!-- ─── Room header ──────────────────────────────────────────── -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/chatDesc">
+        android:background="@drawable/bg_home_header"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="20dp">
 
-        <!-- Anonymous Message -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_onboarding_card"
-            android:backgroundTint="#F0E6D8"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-                <View
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="@drawable/bg_onboarding_card"
-                    android:backgroundTint="#C1A086" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Anonymous"
-                    android:textColor="@color/text_dark"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="5 min ago"
-                    android:textColor="@color/text_muted"
-                    android:textSize="10sp" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Anyone else awake at 3am? Baby won't settle and I'm exhausted..."
-                android:textColor="@color/text_dark"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <!-- Your Message -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_onboarding_card"
-            android:backgroundTint="@android:color/white"
-            android:elevation="1dp"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-                <View
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="@drawable/bg_onboarding_card"
-                    android:backgroundTint="#C2E0C6" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="You"
-                    android:textColor="@color/text_dark"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Just now"
-                    android:textColor="@color/text_muted"
-                    android:textSize="10sp" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="You're not alone. I'm here too. Sending you strength 💛"
-                android:textColor="@color/text_dark"
-                android:textSize="14sp" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- Urgent Help Overlay -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="-10dp"
-        android:layout_marginBottom="-10dp"
-        android:background="@drawable/bg_onboarding_card"
-        android:backgroundTint="@color/urgent_bg_dark"
-        android:orientation="vertical"
-        android:padding="4dp"
-        app:layout_constraintBottom_toTopOf="@id/inputContainer"
-        app:layout_constraintEnd_toEndOf="parent">
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/chatTitle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:text="URGENT HELP"
+            android:fontFamily="serif"
+            android:text="Chat Room"
             android:textColor="@android:color/white"
-            android:textSize="8sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/chatDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Description"
+            android:textColor="#CCffffff"
+            android:textSize="13sp" />
     </LinearLayout>
 
-    <ImageView
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/bg_onboarding_card"
-        android:backgroundTint="@color/urgent_red"
-        android:padding="12dp"
-        android:src="@android:drawable/ic_dialog_alert"
-        app:layout_constraintBottom_toTopOf="@id/inputContainer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@android:color/white" />
+    <!-- ─── Messages list ────────────────────────────────────────── -->
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp">
 
-    <!-- Chat Input -->
+        <LinearLayout
+            android:id="@+id/messagesContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <!-- ─── Input bar ────────────────────────────────────────────── -->
     <LinearLayout
         android:id="@+id/inputContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/messagesContainer">
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:elevation="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp">
 
-        <EditText
-            android:id="@+id/etChatMessage"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_onboarding_card"
-            android:backgroundTint="@color/bg_cream"
-            android:hint="Share your thoughts..."
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textSize="14sp" />
-
-        <Button
-            android:id="@+id/btnSendChat"
+        <!-- Anonymous toggle -->
+        <CheckBox
+            android:id="@+id/cbAnonymous"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:backgroundTint="@color/brown_primary"
-            android:text="Send"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white"
-            android:textStyle="bold" />
+            android:text="Post anonymously"
+            android:textColor="@color/text_muted"
+            android:textSize="12sp"
+            android:paddingStart="4dp" />
+
+        <!-- Text field + send button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etChatMessage"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_onboarding_card"
+                android:backgroundTint="#F0EBE5"
+                android:hint="Share your thoughts…"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:imeOptions="actionSend" />
+
+            <Button
+                android:id="@+id/btnSendChat"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:backgroundTint="@color/brown_primary"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:text="Send"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

@@ -22,22 +22,44 @@
             android:paddingTop="50dp"
             android:paddingBottom="40dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="serif"
-                android:text="Info Hub"
-                android:textColor="@android:color/white"
-                android:textSize="34sp"
-                android:textStyle="bold" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="serif"
+                        android:text="Info Hub"
+                        android:textColor="@android:color/white"
+                        android:textSize="34sp"
+                        android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Learn, understand, and find support"
-                android:textColor="@android:color/white"
-                android:textSize="15sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Learn, understand, and find support"
+                        android:textColor="@android:color/white"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/ivAddArticle"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/bg_circle_avatar"
+                    android:backgroundTint="@android:color/white"
+                    android:padding="8dp"
+                    android:src="@android:drawable/ic_menu_add"
+                    android:visibility="gone"
+                    app:tint="@color/banner_green" />
+            </RelativeLayout>
         </LinearLayout>
 
         <!-- Search Bar -->
@@ -253,94 +275,15 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
-        <!-- Article Card 1 -->
+        <!-- Articles Container -->
         <LinearLayout
-            android:id="@+id/cardArticle1"
+            android:id="@+id/articlesContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="20dp"
-            android:background="@drawable/bg_onboarding_card"
-            android:elevation="2dp"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:background="@color/text_muted"
-                android:scaleType="centerCrop"
-                android:src="@mipmap/ic_launcher" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/tvResourceTopic"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_onboarding_card"
-                        android:backgroundTint="@color/banner_green"
-                        android:paddingStart="12dp"
-                        android:paddingTop="4dp"
-                        android:paddingEnd="12dp"
-                        android:paddingBottom="4dp"
-                        android:text="Postpartum Depression"
-                        android:textColor="@color/accent_green"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:text="🕒 5 min read"
-                        android:textColor="@color/text_muted"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvResourceTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:fontFamily="serif"
-                    android:text="Understanding Postpartum Depression: You Are Not Alone"
-                    android:textColor="@color/text_dark"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvResourceExcerpt"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Learn about the signs, symptoms, and remember that what you feel is valid and treatable."
-                    android:textColor="@color/text_muted"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:drawableStart="@drawable/ic_book"
-                    android:drawablePadding="8dp"
-                    android:drawableTint="@color/text_dark"
-                    android:text="Read more"
-                    android:textColor="@color/text_dark"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </LinearLayout>
+            android:orientation="vertical" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
