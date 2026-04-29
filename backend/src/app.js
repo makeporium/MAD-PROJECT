@@ -9,6 +9,7 @@ const eventsRoutes = require("./routes/eventsRoutes");
 const resourcesRoutes = require("./routes/resourcesRoutes");
 const remindersRoutes = require("./routes/remindersRoutes");
 const supportRoutes = require("./routes/supportRoutes");
+const calendarRoutes = require("./routes/calendarRoutes");
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use("/api/resources", resourcesRoutes);
 app.use("/api/reminders", remindersRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/testimonials", require("./routes/testimonialsRoutes"));
+app.use("/api/calendar", calendarRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error("Unhandled error:", err);

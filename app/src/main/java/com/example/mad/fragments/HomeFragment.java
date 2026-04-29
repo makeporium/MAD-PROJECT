@@ -172,70 +172,121 @@ public class HomeFragment extends Fragment {
     private void setupMoodLineChart(View view) {
         LineChart chart = view.findViewById(R.id.moodLineChart);
 
-        // Sample mood data for 7 days (scale 1-5)
-        List<Entry> entries = new ArrayList<>();
-        entries.add(new Entry(0, 3.5f));
-        entries.add(new Entry(1, 2.8f));
-        entries.add(new Entry(2, 4.2f));
-        entries.add(new Entry(3, 3.0f));
-        entries.add(new Entry(4, 4.5f));
-        entries.add(new Entry(5, 3.8f));
-        entries.add(new Entry(6, 4.0f));
+        BackendClient.getMoodEntries(requireContext(), new BackendClient.JsonCallback() {
+            @Override
+            public void onSuccess(JSONArray data) {
+                if (getActivity() == null) return;
 
-        LineDataSet dataSet = new LineDataSet(entries, "Mood");
+                getActivity().runOnUiThread(() -> {
+                    List<Entry> entries = new ArrayList<>();
+                    List<String> daysList = new ArrayList<>();
 
-        // Styling the line
-        int terracotta = ContextCompat.getColor(requireContext(), R.color.primary_terracotta);
+                    try {
+                        if (data.length() == 0) {
+                            chart.setVisibility(View.INVISIBLE);
+                            return;
+                        }
+                        chart.setVisibility(View.VISIBLE);
 
-        dataSet.setColor(terracotta);
-        dataSet.setLineWidth(3f);
-        dataSet.setCircleColor(terracotta);
-        dataSet.setCircleRadius(5f);
-        dataSet.setCircleHoleColor(Color.WHITE);
-        dataSet.setCircleHoleRadius(3f);
-        dataSet.setDrawValues(false);
-        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        dataSet.setDrawFilled(true);
-        dataSet.setFillColor(terracotta);
-        dataSet.setFillAlpha(40);
+                        java.text.SimpleDateFormat inFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+                        java.text.SimpleDateFormat outFormat = new java.text.SimpleDateFormat("MMM dd", java.util.Locale.US);
 
-        LineData lineData = new LineData(dataSet);
-        chart.setData(lineData);
+                        // Filter to get the latest entry per day, up to 7 days
+                        List<JSONObject> dailyEntries = new ArrayList<>();
+                        java.util.Set<String> seenDates = new java.util.HashSet<>();
 
-        // X-axis labels (days)
-        String[] days = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-        XAxis xAxis = chart.getXAxis();
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(days));
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setGranularity(1f);
-        xAxis.setDrawGridLines(false);
-        xAxis.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_muted));
-        xAxis.setTextSize(11f);
+                        for (int i = 0; i < data.length(); i++) {
+                            JSONObject obj = data.getJSONObject(i);
+                            String rawDate = obj.optString("entry_date", "");
+                            String dateKey = rawDate.length() >= 10 ? rawDate.substring(0, 10) : rawDate;
+                            if (!dateKey.isEmpty() && !seenDates.contains(dateKey)) {
+                                seenDates.add(dateKey);
+                                dailyEntries.add(obj);
+                                if (dailyEntries.size() == 7) break;
+                            }
+                        }
 
-        // Y-axis
-        YAxis leftAxis = chart.getAxisLeft();
-        leftAxis.setAxisMinimum(0f);
-        leftAxis.setAxisMaximum(5f);
-        leftAxis.setGranularity(1f);
-        leftAxis.setDrawGridLines(true);
-        leftAxis.setGridColor(Color.parseColor("#E8E0D8"));
-        leftAxis.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_muted));
-        leftAxis.setTextSize(11f);
+                        // Reverse to plot chronologically (oldest on left)
+                        java.util.Collections.reverse(dailyEntries);
 
-        chart.getAxisRight().setEnabled(false);
+                        for (int i = 0; i < dailyEntries.size(); i++) {
+                            JSONObject obj = dailyEntries.get(i);
+                            float mood = (float) obj.optDouble("mood_level", 0);
+                            entries.add(new Entry(i, mood));
 
-        // Chart styling
-        chart.getDescription().setEnabled(false);
-        chart.getLegend().setEnabled(false);
-        chart.setTouchEnabled(true);
-        chart.setDragEnabled(false);
-        chart.setScaleEnabled(false);
-        chart.setPinchZoom(false);
-        chart.setDrawBorders(false);
-        chart.setExtraBottomOffset(8f);
-        chart.setBackgroundColor(Color.TRANSPARENT);
-        chart.animateX(1000);
-        chart.invalidate();
+                            String rawDate = obj.optString("entry_date", "");
+                            String label = "";
+                            if (!rawDate.isEmpty() && rawDate.length() >= 10) {
+                                try {
+                                    java.util.Date date = inFormat.parse(rawDate.substring(0, 10));
+                                    if (date != null) {
+                                        label = outFormat.format(date);
+                                    }
+                                } catch (Exception e) {}
+                            }
+                            daysList.add(label);
+                        }
+
+                        LineDataSet dataSet = new LineDataSet(entries, "Mood");
+                        int terracotta = ContextCompat.getColor(requireContext(), R.color.primary_terracotta);
+                        dataSet.setColor(terracotta);
+                        dataSet.setLineWidth(3f);
+                        dataSet.setCircleColor(terracotta);
+                        dataSet.setCircleRadius(5f);
+                        dataSet.setCircleHoleColor(Color.WHITE);
+                        dataSet.setCircleHoleRadius(3f);
+                        dataSet.setDrawValues(false);
+                        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+                        dataSet.setDrawFilled(true);
+                        dataSet.setFillColor(terracotta);
+                        dataSet.setFillAlpha(40);
+
+                        LineData lineData = new LineData(dataSet);
+                        chart.setData(lineData);
+
+                        XAxis xAxis = chart.getXAxis();
+                        xAxis.setValueFormatter(new IndexAxisValueFormatter(daysList));
+                        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+                        xAxis.setGranularity(1f);
+                        xAxis.setDrawGridLines(false);
+                        xAxis.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_muted));
+                        xAxis.setTextSize(11f);
+
+                        YAxis leftAxis = chart.getAxisLeft();
+                        leftAxis.setAxisMinimum(0f);
+                        leftAxis.setAxisMaximum(5f);
+                        leftAxis.setGranularity(1f);
+                        leftAxis.setDrawGridLines(true);
+                        leftAxis.setGridColor(Color.parseColor("#E8E0D8"));
+                        leftAxis.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_muted));
+                        leftAxis.setTextSize(11f);
+
+                        chart.getAxisRight().setEnabled(false);
+                        chart.getDescription().setEnabled(false);
+                        chart.getLegend().setEnabled(false);
+                        chart.setTouchEnabled(true);
+                        chart.setDragEnabled(false);
+                        chart.setScaleEnabled(false);
+                        chart.setPinchZoom(false);
+                        chart.setDrawBorders(false);
+                        chart.setExtraBottomOffset(8f);
+                        chart.setBackgroundColor(Color.TRANSPARENT);
+                        chart.animateX(1000);
+                        chart.invalidate();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> chart.setVisibility(View.INVISIBLE));
+                }
+            }
+        });
     }
 
     private List<String[]> realTestimonials = new ArrayList<>();

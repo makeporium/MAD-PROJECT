@@ -45,27 +45,46 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  if (req.user.role !== 'expert') return res.status(403).json({ message: "Forbidden" });
-  const { title, topic, excerpt, content, imageUrl, tags } = resourceSchema.parse(req.body);
-  await sequelize.query(
-    "INSERT INTO info_resources (title, topic, excerpt, content, image_url, tags, author_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    { replacements: [title, topic, excerpt, content, imageUrl || null, tags || '', req.user.sub] }
-  );
-  res.status(201).json({ message: "Created" });
+  try {
+    const [users] = await sequelize.query("SELECT role FROM users WHERE id = ?", { replacements: [req.user.sub] });
+    if (!users.length || users[0].role !== 'expert') return res.status(403).json({ message: "Forbidden: Only experts can create resources." });
+    const { title, topic, excerpt, content, imageUrl, tags } = resourceSchema.parse(req.body);
+    await sequelize.query(
+      "INSERT INTO info_resources (title, topic, excerpt, content, image_url, tags, author_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      { replacements: [title, topic, excerpt, content, imageUrl || null, tags || '', req.user.sub] }
+    );
+    res.status(201).json({ message: "Created" });
+  } catch (err) {
+    if (err.errors) {
+      res.status(400).json({ error: "Validation failed: " + err.errors.map(e => e.path + " " + e.message).join(", ") });
+    } else {
+      res.status(400).json({ error: err.message || "An error occurred." });
+    }
+  }
 });
 
 router.put("/:id", async (req, res) => {
-  if (req.user.role !== 'expert') return res.status(403).json({ message: "Forbidden" });
-  const { title, topic, excerpt, content, imageUrl, tags } = resourceSchema.parse(req.body);
-  await sequelize.query(
-    "UPDATE info_resources SET title=?, topic=?, excerpt=?, content=?, image_url=?, tags=? WHERE id=?",
-    { replacements: [title, topic, excerpt, content, imageUrl || null, tags || '', req.params.id] }
-  );
-  res.status(200).json({ message: "Updated" });
+  try {
+    const [users] = await sequelize.query("SELECT role FROM users WHERE id = ?", { replacements: [req.user.sub] });
+    if (!users.length || users[0].role !== 'expert') return res.status(403).json({ message: "Forbidden: Only experts can update resources." });
+    const { title, topic, excerpt, content, imageUrl, tags } = resourceSchema.parse(req.body);
+    await sequelize.query(
+      "UPDATE info_resources SET title=?, topic=?, excerpt=?, content=?, image_url=?, tags=? WHERE id=?",
+      { replacements: [title, topic, excerpt, content, imageUrl || null, tags || '', req.params.id] }
+    );
+    res.status(200).json({ message: "Updated" });
+  } catch (err) {
+    if (err.errors) {
+      res.status(400).json({ error: "Validation failed: " + err.errors.map(e => e.path + " " + e.message).join(", ") });
+    } else {
+      res.status(400).json({ error: err.message || "An error occurred." });
+    }
+  }
 });
 
 router.delete("/:id", async (req, res) => {
-  if (req.user.role !== 'expert') return res.status(403).json({ message: "Forbidden" });
+  const [users] = await sequelize.query("SELECT role FROM users WHERE id = ?", { replacements: [req.user.sub] });
+  if (!users.length || users[0].role !== 'expert') return res.status(403).json({ message: "Forbidden: Only experts can delete resources." });
   await sequelize.query("DELETE FROM info_resources WHERE id=?", { replacements: [req.params.id] });
   res.status(200).json({ message: "Deleted" });
 });

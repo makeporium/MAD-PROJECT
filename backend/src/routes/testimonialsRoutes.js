@@ -6,6 +6,13 @@ const auth = require("../middleware/authMiddleware");
 const router = express.Router();
 router.use(auth);
 
+async function isExpertUser(userId) {
+  const [rows] = await sequelize.query("SELECT role FROM users WHERE id = ? LIMIT 1", {
+    replacements: [userId],
+  });
+  return rows.length > 0 && rows[0].role === "expert";
+}
+
 const testimonialSchema = z.object({
   content: z.string().min(1)
 });
@@ -18,7 +25,7 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  if (req.user.role !== 'expert') return res.status(403).json({ message: "Forbidden" });
+  if (!(await isExpertUser(req.user.sub))) return res.status(403).json({ message: "Forbidden" });
   const { content } = testimonialSchema.parse(req.body);
   await sequelize.query(
     "INSERT INTO testimonials (user_id, content) VALUES (?, ?)",
@@ -28,7 +35,7 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  if (req.user.role !== 'expert') return res.status(403).json({ message: "Forbidden" });
+  if (!(await isExpertUser(req.user.sub))) return res.status(403).json({ message: "Forbidden" });
   const { content } = testimonialSchema.parse(req.body);
   await sequelize.query(
     "UPDATE testimonials SET content = ? WHERE id = ?",
@@ -38,7 +45,7 @@ router.put("/:id", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  if (req.user.role !== 'expert') return res.status(403).json({ message: "Forbidden" });
+  if (!(await isExpertUser(req.user.sub))) return res.status(403).json({ message: "Forbidden" });
   await sequelize.query("DELETE FROM testimonials WHERE id = ?", { replacements: [req.params.id] });
   res.status(200).json({ message: "Deleted" });
 });

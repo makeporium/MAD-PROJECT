@@ -29,4 +29,28 @@ router.post("/", async (req, res) => {
   res.status(201).json({ message: "Reminder created" });
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const payload = schema.parse(req.body);
+    const [result] = await sequelize.query(
+      "UPDATE reminders SET title=?, remind_at=?, notes=? WHERE id=? AND user_id=?",
+      { replacements: [payload.title, payload.remind_at, payload.notes || null, req.params.id, req.user.sub] }
+    );
+    if (result.affectedRows === 0) return res.status(404).json({ error: "Reminder not found or not yours." });
+    res.status(200).json({ message: "Reminder updated" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  const [result] = await sequelize.query(
+    "DELETE FROM reminders WHERE id=? AND user_id=?",
+    { replacements: [req.params.id, req.user.sub] }
+  );
+  if (result.affectedRows === 0) return res.status(404).json({ error: "Reminder not found or not yours." });
+  res.status(200).json({ message: "Reminder deleted" });
+});
+
 module.exports = router;
+

@@ -322,6 +322,14 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle(getString(R.string.sign_out_confirm_title))
                 .setMessage(getString(R.string.sign_out_confirm_message))
                 .setPositiveButton("Yes", (dialog, which) -> {
+                    // Sign out from Firebase and Google completely
+                    com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
+                    com.google.android.gms.auth.api.signin.GoogleSignInOptions gso =
+                        new com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(
+                            com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .build();
+                    com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(MainActivity.this, gso).signOut();
+
                     getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().clear().apply();
                     BackendClient.clearAccessToken(this);
                     etFirstName.setText(""); etSurname.setText("");

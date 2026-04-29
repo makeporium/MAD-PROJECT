@@ -7,9 +7,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 
 import okhttp3.MediaType;
 import okhttp3.Call;
@@ -123,6 +120,9 @@ public class BackendClient {
     private static String extractErrorMessage(String rawJson) {
         try {
             JSONObject obj = new JSONObject(rawJson);
+            if (obj.has("error")) {
+                return obj.getString("error");
+            }
             if (obj.has("errorDetail")) {
                 return obj.getString("errorDetail");
             }
@@ -182,12 +182,54 @@ public class BackendClient {
         makeAuthorizedGetArray(context, "/api/testimonials", callback);
     }
 
-    public static void getRecommendations(Context context, JsonCallback callback) {
-        makeAuthorizedGetArray(context, "/api/recommends", callback);
+    public static void getRecommendations(Context context, String prompt, JsonCallback callback) {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("prompt", prompt);
+            Request request = authorizedBuilder(context, "/api/recommends/ai-search")
+                    .post(RequestBody.create(body.toString(), JSON))
+                    .build();
+            executeArrayRequest(request, callback);
+        } catch (Exception e) {
+            callback.onError(e.getMessage());
+        }
     }
 
     public static void getEvents(Context context, JsonCallback callback) {
         makeAuthorizedGetArray(context, "/api/events", callback);
+    }
+
+    public static void getReminders(Context context, JsonCallback callback) {
+        makeAuthorizedGetArray(context, "/api/reminders", callback);
+    }
+
+    public static void getCalendarProgress(Context context, ObjectCallback callback) {
+        try {
+            Request request = authorizedBuilder(context, "/api/calendar/progress").get().build();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    callback.onError("Network error: " + e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String raw = response.body() != null ? response.body().string() : "";
+                    response.close();
+                    if (!response.isSuccessful()) {
+                        callback.onError(extractErrorMessage(raw));
+                        return;
+                    }
+                    try {
+                        callback.onSuccess(new JSONObject(raw));
+                    } catch (Exception e) {
+                        callback.onError("Invalid backend response");
+                    }
+                }
+            });
+        } catch (Exception e) {
+            callback.onError("Client error: " + e.getMessage());
+        }
     }
 
     public static void bookSession(Context context, long eventId, SimpleCallback callback) {
@@ -224,7 +266,8 @@ public class BackendClient {
             bodyJson.put("location", location);
             bodyJson.put("format", format);
             bodyJson.put("availability", availability);
-            bodyJson.put("fee", fee);
+            String normalizedFee = normalizeDecimal(fee);
+            bodyJson.put("fee", normalizedFee.isEmpty() ? JSONObject.NULL : normalizedFee);
             Request request = authorizedBuilder(context, "/api/events/expert-profile")
                     .post(RequestBody.create(bodyJson.toString(), JSON))
                     .build();
@@ -232,6 +275,18 @@ public class BackendClient {
         } catch (Exception e) {
             callback.onError(e.getMessage());
         }
+    }
+
+    private static String normalizeDecimal(String value) {
+        if (value == null) return "";
+        String cleaned = value.replaceAll("[^0-9.]", "");
+        int firstDot = cleaned.indexOf('.');
+        if (firstDot >= 0) {
+            String before = cleaned.substring(0, firstDot + 1);
+            String after = cleaned.substring(firstDot + 1).replace(".", "");
+            cleaned = before + after;
+        }
+        return cleaned;
     }
 
     public static void getExpertProfiles(Context context, JsonCallback callback) {
@@ -323,6 +378,9 @@ public class BackendClient {
         }
     }
 
+    public static void getAiHistory(Context context, JsonCallback callback) {
+        makeAuthorizedGetArray(context, "/api/support/ai/history", callback);
+    }
     public static void sendSos(Context context, SimpleCallback callback) {
         Request request = authorizedBuilder(context, "/api/support/sos")
                 .post(RequestBody.create("{}", JSON))
@@ -330,11 +388,8 @@ public class BackendClient {
         executeSimpleRequest(request, callback);
     }
 
-    public static void createQuickReminder(Context context, String title, SimpleCallback callback) {
+    public static void createQuickReminder(Context context, String title, String remindAt, SimpleCallback callback) {
         try {
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.HOUR_OF_DAY, 1);
-            String remindAt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(calendar.getTime());
             JSONObject bodyJson = new JSONObject();
             bodyJson.put("title", title);
             bodyJson.put("remind_at", remindAt);
@@ -346,6 +401,32 @@ public class BackendClient {
         } catch (Exception e) {
             callback.onError("Client error: " + e.getMessage());
         }
+    }
+
+    public static void updateReminder(Context context, long reminderId, String title, String remindAt, SimpleCallback callback) {
+        try {
+            JSONObject bodyJson = new JSONObject();
+            bodyJson.put("title", title);
+            bodyJson.put("remind_at", remindAt);
+            bodyJson.put("notes", "Updated from app");
+            Request request = authorizedBuilder(context, "/api/reminders/" + reminderId)
+                    .put(RequestBody.create(bodyJson.toString(), JSON))
+                    .build();
+            executeSimpleRequest(request, callback);
+        } catch (Exception e) {
+            callback.onError("Client error: " + e.getMessage());
+        }
+    }
+
+    public static void deleteReminder(Context context, long reminderId, SimpleCallback callback) {
+        Request request = authorizedBuilder(context, "/api/reminders/" + reminderId)
+                .delete()
+                .build();
+        executeSimpleRequest(request, callback);
+    }
+
+    public static void getMoodEntries(Context context, JsonCallback callback) {
+        makeAuthorizedGetArray(context, "/api/moods", callback);
     }
 
     public static void saveMoodEntry(Context context, int moodLevel, String note, SimpleCallback callback) {
@@ -427,6 +508,30 @@ public class BackendClient {
         } catch (Exception e) {
             callback.onError("Client error: " + e.getMessage());
         }
+    }
+
+    public static void executeArrayRequest(Request request, JsonCallback callback) {
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onError("Network error: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String raw = response.body() != null ? response.body().string() : "";
+                response.close();
+                if (!response.isSuccessful()) {
+                    callback.onError(extractErrorMessage(raw));
+                    return;
+                }
+                try {
+                    callback.onSuccess(new JSONArray(raw));
+                } catch (Exception e) {
+                    callback.onError("Invalid backend response");
+                }
+            }
+        });
     }
 
     public static void executeSimpleRequest(Request request, SimpleCallback callback) {

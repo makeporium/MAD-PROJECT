@@ -21,6 +21,8 @@ import org.json.JSONObject;
 
 public class InfoHubFragment extends Fragment {
     private android.widget.LinearLayout articlesContainer;
+    private JSONArray allArticles = new JSONArray();
+    private android.widget.EditText etSearch;
 
     @Nullable
     @Override
@@ -58,6 +60,20 @@ public class InfoHubFragment extends Fragment {
                 ivAddArticle.setVisibility(View.GONE);
             }
         }
+
+        etSearch = view.findViewById(R.id.etSearch);
+        if (etSearch != null) {
+            etSearch.addTextChangedListener(new android.text.TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    renderArticles(s.toString());
+                }
+                @Override
+                public void afterTextChanged(android.text.Editable s) {}
+            });
+        }
     }
 
     // ── Expert: add article dialog ────────────────────────────────────────────
@@ -75,6 +91,7 @@ public class InfoHubFragment extends Fragment {
         final android.widget.EditText excerptInput = addInput(layout, "Short Excerpt");
         final android.widget.EditText contentInput = addInput(layout, "Full content text or URL");
         final android.widget.EditText imageInput   = addInput(layout, "Image URL (optional)");
+        final android.widget.EditText tagsInput    = addInput(layout, "Tags (comma separated)");
 
         builder.setView(layout);
         builder.setPositiveButton("Create", (dialog, which) -> {
@@ -85,6 +102,7 @@ public class InfoHubFragment extends Fragment {
                 bodyJson.put("excerpt",  excerptInput.getText().toString().trim());
                 bodyJson.put("content",  contentInput.getText().toString().trim());
                 bodyJson.put("imageUrl", imageInput.getText().toString().trim());
+                bodyJson.put("tags",     tagsInput.getText().toString().trim());
 
                 okhttp3.Request request = BackendClient
                         .authorizedBuilder(requireContext(), "/api/resources")
@@ -165,60 +183,80 @@ public class InfoHubFragment extends Fragment {
         }
     }
 
+    private void renderArticles(String query) {
+        if (getActivity() == null || articlesContainer == null) return;
+        getActivity().runOnUiThread(() -> {
+            articlesContainer.removeAllViews();
+            
+            String lowerQuery = query == null ? "" : query.toLowerCase().trim();
+            int displayedCount = 0;
+
+            for (int i = 0; i < allArticles.length(); i++) {
+                JSONObject article = allArticles.optJSONObject(i);
+                if (article == null) continue;
+
+                String topicStr   = article.optString("topic", "");
+                String titleStr   = article.optString("title", "");
+                String excerptStr = article.optString("excerpt", "");
+                String tagsStr    = article.optString("tags", "");
+
+                // Filtering logic
+                if (!lowerQuery.isEmpty()) {
+                    boolean matches = titleStr.toLowerCase().contains(lowerQuery) ||
+                                      topicStr.toLowerCase().contains(lowerQuery) ||
+                                      tagsStr.toLowerCase().contains(lowerQuery) ||
+                                      excerptStr.toLowerCase().contains(lowerQuery);
+                    if (!matches) continue;
+                }
+
+                displayedCount++;
+                View articleView = LayoutInflater.from(getContext())
+                        .inflate(R.layout.item_article, articlesContainer, false);
+
+                String contentStr = article.optString("content", "");
+                String imageUrl   = article.optString("image_url", "");
+                int views         = article.optInt("views", 0);
+                long articleId    = article.optLong("id", -1);
+
+                ((TextView) articleView.findViewById(R.id.tvResourceTopic)).setText(topicStr);
+                ((TextView) articleView.findViewById(R.id.tvResourceTitle)).setText(titleStr);
+                ((TextView) articleView.findViewById(R.id.tvResourceExcerpt)).setText(excerptStr);
+                ((TextView) articleView.findViewById(R.id.tvResourceViews)).setText(views + " views");
+
+                // Load thumbnail
+                android.widget.ImageView ivThumb = articleView.findViewById(R.id.ivArticleImage);
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    com.bumptech.glide.Glide.with(InfoHubFragment.this)
+                            .load(imageUrl)
+                            .centerCrop()
+                            .into(ivThumb);
+                }
+
+                articleView.setOnClickListener(v ->
+                        openArticle(articleId, titleStr, contentStr, topicStr, views, imageUrl));
+                articlesContainer.addView(articleView);
+            }
+
+            if (displayedCount == 0) {
+                TextView empty = new TextView(getContext());
+                empty.setText("No articles found.");
+                empty.setTextColor(android.graphics.Color.parseColor("#888888"));
+                empty.setPadding(0, 24, 0, 24);
+                articlesContainer.addView(empty);
+            }
+        });
+    }
+
     private void loadResources(String topic) {
         currentTopic = topic;
-        // Update chip highlights
         refreshChipVisuals(topic);
 
         BackendClient.getResources(requireContext(), topic, new BackendClient.JsonCallback() {
             @Override
             public void onSuccess(JSONArray data) {
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(() -> {
-                    if (articlesContainer == null) return;
-                    articlesContainer.removeAllViews();
-                    if (data.length() == 0) {
-                        TextView empty = new TextView(getContext());
-                        empty.setText("No articles for this topic yet.");
-                        empty.setTextColor(android.graphics.Color.parseColor("#888888"));
-                        empty.setPadding(0, 24, 0, 24);
-                        articlesContainer.addView(empty);
-                        return;
-                    }
-                    for (int i = 0; i < data.length(); i++) {
-                        JSONObject article = data.optJSONObject(i);
-                        if (article == null) continue;
-
-                        View articleView = LayoutInflater.from(getContext())
-                                .inflate(R.layout.item_article, articlesContainer, false);
-
-                        String topicStr   = article.optString("topic", "");
-                        String titleStr   = article.optString("title", "");
-                        String excerptStr = article.optString("excerpt", "");
-                        String contentStr = article.optString("content", "");
-                        String imageUrl   = article.optString("image_url", "");
-                        int views         = article.optInt("views", 0);
-                        long articleId    = article.optLong("id", -1);
-
-                        ((TextView) articleView.findViewById(R.id.tvResourceTopic)).setText(topicStr);
-                        ((TextView) articleView.findViewById(R.id.tvResourceTitle)).setText(titleStr);
-                        ((TextView) articleView.findViewById(R.id.tvResourceExcerpt)).setText(excerptStr);
-                        ((TextView) articleView.findViewById(R.id.tvResourceViews)).setText(views + " views");
-
-                        // Load thumbnail
-                        android.widget.ImageView ivThumb = articleView.findViewById(R.id.ivArticleImage);
-                        if (imageUrl != null && !imageUrl.isEmpty()) {
-                            com.bumptech.glide.Glide.with(InfoHubFragment.this)
-                                    .load(imageUrl)
-                                    .centerCrop()
-                                    .into(ivThumb);
-                        }
-
-                        articleView.setOnClickListener(v ->
-                                openArticle(articleId, titleStr, contentStr, topicStr, views, imageUrl));
-                        articlesContainer.addView(articleView);
-                    }
-                });
+                allArticles = data;
+                String currentSearch = etSearch != null ? etSearch.getText().toString() : "";
+                renderArticles(currentSearch);
             }
 
             @Override

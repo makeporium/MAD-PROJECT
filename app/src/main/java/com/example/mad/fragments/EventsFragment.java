@@ -1,6 +1,7 @@
 package com.example.mad.fragments;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,6 +26,10 @@ import com.example.mad.network.BackendClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 public class EventsFragment extends Fragment {
     private LinearLayout llUpcomingSessions;
     private LinearLayout llProfessionalSupport;
@@ -32,6 +37,9 @@ public class EventsFragment extends Fragment {
     private Button btnAddSession;
     private Button btnUpdateProfile;
     private boolean isExpertMode = false;
+    private JSONArray latestEvents = new JSONArray();
+    private final android.os.Handler pollHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable pollRunnable = this::refreshData;
 
     @Nullable
     @Override
@@ -70,6 +78,20 @@ public class EventsFragment extends Fragment {
 
         loadEvents();
         loadExperts();
+        pollHandler.postDelayed(pollRunnable, 8000);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        pollHandler.removeCallbacks(pollRunnable);
+    }
+
+    private void refreshData() {
+        loadEvents();
+        loadExperts();
+        pollHandler.removeCallbacks(pollRunnable);
+        pollHandler.postDelayed(pollRunnable, 8000);
     }
 
     private void loadEvents() {
@@ -77,6 +99,7 @@ public class EventsFragment extends Fragment {
         BackendClient.JsonCallback callback = new BackendClient.JsonCallback() {
             @Override
             public void onSuccess(JSONArray data) {
+                latestEvents = data;
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(() -> {
                     LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -89,13 +112,21 @@ public class EventsFragment extends Fragment {
                         TextView tvDesc = itemView.findViewById(R.id.tvDescription);
                         TextView tvDate = itemView.findViewById(R.id.tvDate);
                         TextView tvMode = itemView.findViewById(R.id.tvMode);
+                        TextView tvBookingCount = itemView.findViewById(R.id.tvBookingCount);
                         TextView tvBookings = itemView.findViewById(R.id.tvBookings);
                         Button btnAction = itemView.findViewById(R.id.btnAction);
 
                         tvTitle.setText(event.optString("title"));
                         tvDesc.setText(event.optString("description"));
-                        tvDate.setText(event.optString("event_date"));
                         tvMode.setText(event.optString("mode", "Online").toUpperCase());
+
+                        // Format date as "28 Apr  •  06:30 PM"
+                        String rawDate = event.optString("event_date", "");
+                        tvDate.setText("🕐 " + formatEventDate(rawDate));
+
+                        // Booking count — visible to everyone
+                        int count = event.optInt("booking_count", 0);
+                        tvBookingCount.setText("👥 " + count + (count == 1 ? " person booked" : " people booked"));
 
                         if (isExpertMode) {
                             tvBookings.setVisibility(View.VISIBLE);
@@ -122,18 +153,30 @@ public class EventsFragment extends Fragment {
                                 }
                             });
                         } else {
-                            btnAction.setText("Book / Join");
+                            boolean isBooked = event.optInt("is_booked", 0) == 1 || event.optBoolean("is_booked", false);
+                            btnAction.setText(isBooked ? "Join" : "Book");
                             btnAction.setOnClickListener(v -> {
+                                boolean bookedNow = event.optInt("is_booked", 0) == 1 || event.optBoolean("is_booked", false);
+                                if (bookedNow) {
+                                    String joinLink = event.optString("join_link", "");
+                                    if (!joinLink.isEmpty()) {
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(joinLink)));
+                                    } else {
+                                        Toast.makeText(getContext(), "No link available", Toast.LENGTH_SHORT).show();
+                                    }
+                                    return;
+                                }
+
                                 BackendClient.bookSession(requireContext(), event.optLong("id"), new BackendClient.SimpleCallback() {
                                     @Override
                                     public void onSuccess(String message) {
                                         if (getActivity() == null) return;
                                         getActivity().runOnUiThread(() -> {
-                                            Toast.makeText(getContext(), "Session Booked! Opening link...", Toast.LENGTH_SHORT).show();
-                                            String joinLink = event.optString("join_link", "");
-                                            if (!joinLink.isEmpty()) {
-                                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(joinLink)));
-                                            }
+                                            event.remove("is_booked");
+                                            try { event.put("is_booked", 1); } catch (Exception ignored) {}
+                                            btnAction.setText("Join");
+                                            Toast.makeText(getContext(), "Session booked successfully", Toast.LENGTH_SHORT).show();
+                                            refreshData();
                                         });
                                     }
                                     @Override
@@ -141,10 +184,10 @@ public class EventsFragment extends Fragment {
                                         if (getActivity() == null) return;
                                         getActivity().runOnUiThread(() -> {
                                             if (message.contains("Already booked")) {
-                                                String joinLink = event.optString("join_link", "");
-                                                if (!joinLink.isEmpty()) {
-                                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(joinLink)));
-                                                }
+                                                event.remove("is_booked");
+                                                try { event.put("is_booked", 1); } catch (Exception ignored) {}
+                                                btnAction.setText("Join");
+                                                Toast.makeText(getContext(), "Already booked. You can join now.", Toast.LENGTH_SHORT).show();
                                             } else {
                                                 Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
                                             }
@@ -193,6 +236,7 @@ public class EventsFragment extends Fragment {
                         TextView tvFormat = itemView.findViewById(R.id.tvFormat);
                         TextView tvAvailability = itemView.findViewById(R.id.tvAvailability);
                         TextView tvFee = itemView.findViewById(R.id.tvFee);
+                        Button btnBookExpert = itemView.findViewById(R.id.btnBookExpert);
 
                         String name = expert.optString("expert_name", "Expert");
                         tvName.setText(name);
@@ -202,6 +246,14 @@ public class EventsFragment extends Fragment {
                         tvFormat.setText("📹 " + expert.optString("format", "Online"));
                         tvAvailability.setText("🕒 " + expert.optString("availability", "Available"));
                         tvFee.setText(expert.optString("fee", "₹0/session"));
+                        boolean isExpertUser = getActivity() instanceof MainActivity
+                                && "expert".equals(((MainActivity) getActivity()).getUserRole());
+                        if (isExpertUser) {
+                            btnBookExpert.setVisibility(View.GONE);
+                        } else {
+                            btnBookExpert.setVisibility(View.VISIBLE);
+                            btnBookExpert.setOnClickListener(v -> bookFirstSessionForExpert(expert, btnBookExpert));
+                        }
 
                         llProfessionalSupport.addView(itemView);
                     }
@@ -211,6 +263,84 @@ public class EventsFragment extends Fragment {
             @Override
             public void onError(String message) {}
         });
+    }
+
+    private void bookFirstSessionForExpert(JSONObject expert, Button btnBookExpert) {
+        long expertId = expert.optLong("user_id", -1);
+        if (expertId <= 0) {
+            Toast.makeText(getContext(), "No sessions available for this expert", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        JSONObject targetEvent = null;
+        long now = System.currentTimeMillis();
+        for (int i = 0; i < latestEvents.length(); i++) {
+            JSONObject event = latestEvents.optJSONObject(i);
+            if (event == null) continue;
+            if (event.optLong("expert_id", -1) != expertId) continue;
+            long ts = parseBackendDateMillis(event.optString("event_date", ""));
+            if (ts < now) continue;
+            targetEvent = event;
+            break;
+        }
+
+        if (targetEvent == null) {
+            Toast.makeText(getContext(), "No upcoming session by this expert", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        boolean alreadyBooked = targetEvent.optInt("is_booked", 0) == 1 || targetEvent.optBoolean("is_booked", false);
+        if (alreadyBooked) {
+            Toast.makeText(getContext(), "You already booked a session with this expert", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        long eventId = targetEvent.optLong("id", -1);
+        if (eventId <= 0) return;
+        BackendClient.bookSession(requireContext(), eventId, new BackendClient.SimpleCallback() {
+            @Override
+            public void onSuccess(String message) {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> {
+                    btnBookExpert.setText("Booked");
+                    btnBookExpert.setEnabled(false);
+                    Toast.makeText(getContext(), "Session booked successfully", Toast.LENGTH_SHORT).show();
+                    refreshData();
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private String formatEventDate(String dateTime) {
+        if (dateTime == null || dateTime.trim().isEmpty()) return "TBD";
+        String value = dateTime.trim().replace("T", " ");
+        if (value.length() >= 19) value = value.substring(0, 19);
+        try {
+            java.util.Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).parse(value);
+            if (date == null) return dateTime;
+            SimpleDateFormat dayFmt  = new SimpleDateFormat("dd MMM", Locale.US);
+            SimpleDateFormat timeFmt = new SimpleDateFormat("hh:mm a", Locale.US);
+            return dayFmt.format(date) + "  \u2022  " + timeFmt.format(date);
+        } catch (Exception e) {
+            return dateTime;
+        }
+    }
+
+    private long parseBackendDateMillis(String dateTime) {
+        if (dateTime == null || dateTime.trim().isEmpty()) return Long.MIN_VALUE;
+        String value = dateTime.trim().replace("T", " ");
+        if (value.length() >= 19) value = value.substring(0, 19);
+        try {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).parse(value).getTime();
+        } catch (Exception e) {
+            return Long.MIN_VALUE;
+        }
     }
 
     private void showAddSessionDialog() {
@@ -230,8 +360,13 @@ public class EventsFragment extends Fragment {
         layout.addView(etDesc);
 
         EditText etDate = new EditText(getContext());
-        etDate.setHint("Date (e.g., 2026-12-01 18:00)");
+        etDate.setHint("Select date & time");
+        etDate.setFocusable(false);
+        etDate.setClickable(true);
+        etDate.setLongClickable(false);
         layout.addView(etDate);
+
+        etDate.setOnClickListener(v -> showDateTimePicker(etDate));
 
         EditText etLink = new EditText(getContext());
         etLink.setHint("Meet Link");
@@ -321,5 +456,39 @@ public class EventsFragment extends Fragment {
         });
         builder.setNegativeButton("Cancel", null);
         builder.show();
+    }
+
+    private void showDateTimePicker(EditText target) {
+        Calendar now = Calendar.getInstance();
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                requireContext(),
+                (view, year, month, dayOfMonth) -> {
+                    Calendar selected = Calendar.getInstance();
+                    selected.set(Calendar.YEAR, year);
+                    selected.set(Calendar.MONTH, month);
+                    selected.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    new android.app.TimePickerDialog(
+                            requireContext(),
+                            (timeView, hourOfDay, minute) -> {
+                                selected.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                selected.set(Calendar.MINUTE, minute);
+                                selected.set(Calendar.SECOND, 0);
+                                selected.set(Calendar.MILLISECOND, 0);
+
+                                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+                                target.setText(formatter.format(selected.getTime()));
+                            },
+                            now.get(Calendar.HOUR_OF_DAY),
+                            now.get(Calendar.MINUTE),
+                            false
+                    ).show();
+                },
+                now.get(Calendar.YEAR),
+                now.get(Calendar.MONTH),
+                now.get(Calendar.DAY_OF_MONTH)
+        );
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000L);
+        datePickerDialog.show();
     }
 }

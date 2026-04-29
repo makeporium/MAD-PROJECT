@@ -33,10 +33,20 @@ router.post("/google", async (req, res) => {
     if (error.name === "ZodError") {
       return res.status(400).json({ message: "Invalid request body" });
     }
+    const isFirebaseDnsError =
+      typeof error.message === "string" &&
+      error.message.includes("identitytoolkit.googleapis.com") &&
+      error.message.includes("ENOTFOUND");
     console.error("Auth /google failed:");
     console.error("name:", error.name);
     console.error("message:", error.message);
     console.error("stack:", error.stack);
+    if (isFirebaseDnsError) {
+      return res.status(503).json({
+        message: "Firebase service is unreachable from backend network. Check internet/DNS settings.",
+        errorDetail: error.message,
+      });
+    }
     return res.status(401).json({
       message: "Firebase authentication failed",
       errorDetail: error.message,

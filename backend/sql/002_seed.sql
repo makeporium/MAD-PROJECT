@@ -17,15 +17,19 @@ INSERT INTO events (title, description, event_date, mode, join_link) VALUES
 ('Mindfulness mini workshop', 'Calming exercises and anxiety management', DATE_ADD(NOW(), INTERVAL 5 DAY), 'online', 'https://meet.example.com/mindful');
 
 INSERT INTO users (firebase_uid, email, name, role) VALUES
-('dummy-expert-uid-123', 'expert@example.com', 'Dr. Sarah (Expert)', 'expert');
+('dummy-expert-uid-123', 'expert@example.com', 'Dr. Sarah (Expert)', 'expert')
+ON DUPLICATE KEY UPDATE
+email = VALUES(email),
+name = VALUES(name),
+role = VALUES(role);
 
 INSERT INTO testimonials (user_id, content) VALUES
-(1, 'This app changed my life. I finally feel understood and supported during my postpartum journey.');
+((SELECT id FROM users WHERE firebase_uid = 'dummy-expert-uid-123' LIMIT 1), 'This app changed my life. I finally feel understood and supported during my postpartum journey.');
 
 INSERT INTO info_resources (title, topic, excerpt, content, image_url, tags, views, author_id) VALUES
-('Understanding Postpartum Depression', 'PPD', 'Signs, symptoms, and when to ask for help.', 'Postpartum depression (PPD) is a complex mix of physical, emotional, and behavioral changes that happen in some women after giving birth. PPD is a type of depression that happens within 4 weeks after delivery. The diagnosis of postpartum depression is based not only on the length of time between delivery and onset but on the severity of the depression. If you feel like this, please seek help.', 'https://example.com/image1.jpg', 'depression,mental health', 150, 1),
-('Coping with Emotional Swings', 'Coping', 'Daily coping strategies and routines.', 'Emotional swings are common. Try breathing exercises, mindfulness, and talking to your partner or friends about your feelings. Acknowledge that your hormones are shifting rapidly. Taking 10 minutes a day just for yourself can make a huge difference in navigating these emotions.', 'https://example.com/image2.jpg', 'emotions,coping', 85, 1),
-('How Partners Can Support Recovery', 'Partner', 'What meaningful support looks like.', 'Partners play a crucial role. This means taking over night feeds, making sure the mother is hydrated, and managing household chores without being asked. Emotional support involves listening without always trying to "fix" things, and reassuring the mother that she is doing a great job.', 'https://example.com/image3.jpg', 'partner,support', 230, 1);
+('Understanding Postpartum Depression', 'PPD', 'Signs, symptoms, and when to ask for help.', 'Postpartum depression (PPD) is a complex mix of physical, emotional, and behavioral changes that happen in some women after giving birth. PPD is a type of depression that happens within 4 weeks after delivery. The diagnosis of postpartum depression is based not only on the length of time between delivery and onset but on the severity of the depression. If you feel like this, please seek help.', 'https://example.com/image1.jpg', 'depression,mental health', 150, (SELECT id FROM users WHERE firebase_uid = 'dummy-expert-uid-123' LIMIT 1)),
+('Coping with Emotional Swings', 'Coping', 'Daily coping strategies and routines.', 'Emotional swings are common. Try breathing exercises, mindfulness, and talking to your partner or friends about your feelings. Acknowledge that your hormones are shifting rapidly. Taking 10 minutes a day just for yourself can make a huge difference in navigating these emotions.', 'https://example.com/image2.jpg', 'emotions,coping', 85, (SELECT id FROM users WHERE firebase_uid = 'dummy-expert-uid-123' LIMIT 1)),
+('How Partners Can Support Recovery', 'Partner', 'What meaningful support looks like.', 'Partners play a crucial role. This means taking over night feeds, making sure the mother is hydrated, and managing household chores without being asked. Emotional support involves listening without always trying to "fix" things, and reassuring the mother that she is doing a great job.', 'https://example.com/image3.jpg', 'partner,support', 230, (SELECT id FROM users WHERE firebase_uid = 'dummy-expert-uid-123' LIMIT 1));
 
 -- Update existing resources with better images
 UPDATE info_resources SET image_url = 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?q=80&w=1000' WHERE topic = 'Sleep';
