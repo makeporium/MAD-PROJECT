@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const payload = saveMoodSchema.parse(req.body);
   await sequelize.query(
-    "INSERT INTO mood_entries (user_id, mood_level, note, entry_date) VALUES (?, ?, ?, COALESCE(?, CURDATE()))",
+    "INSERT INTO mood_entries (user_id, mood_level, note, entry_date) VALUES (?, ?, ?, COALESCE(?, CURDATE()))", //option to choose for coalesce
     { replacements: [req.user.sub, payload.mood_level, payload.note || null, payload.entry_date || null] }
   );
   res.status(201).json({ message: "Mood entry saved" });

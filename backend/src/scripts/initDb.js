@@ -46,6 +46,46 @@ async function ensureEventsSchema() {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )`
   );
+
+  // 1. Custom Indexing
+  // Check if index exists before creating to prevent "Duplicate key" crashes on nodemon restarts.
+  const [indexExists] = await sequelize.query(
+    `SELECT 1 FROM information_schema.STATISTICS
+     WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'mood_entries' AND INDEX_NAME = 'idx_entry_date' LIMIT 1`,
+    { replacements: [env.mysqlDatabase] }
+  );
+
+  if (!indexExists.length) {
+    await sequelize.query("CREATE INDEX idx_entry_date ON mood_entries(entry_date)");
+  }
+
+  // 2. Views
+  // We create this view dynamically after expert_profiles table is guaranteed to exist.
+  await sequelize.query(`
+    CREATE OR REPLACE VIEW expert_directory AS
+    SELECT ep.*, u.name as expert_name, u.avatar_url 
+    FROM expert_profiles ep 
+    JOIN users u ON ep.user_id = u.id
+  `);
+
+  // 3. Stored Procedures
+  // we are doing this in single block of code to avoid ; or //dilimter issues -- delimiter is only allowed in mysql workbench not in node, so we didnt use begin and end
+   // A single-statement procedure avoids the need for BEGIN/END and DELIMITER bugs in NodeJS SQL execution.
+  await sequelize.query(`DROP PROCEDURE IF EXISTS upsert_expert_profile`);
+  await sequelize.query(`
+    CREATE PROCEDURE upsert_expert_profile(
+        IN p_user_id BIGINT,
+        IN p_specialty VARCHAR(150),
+        IN p_location VARCHAR(100),
+        IN p_format VARCHAR(50),
+        IN p_availability VARCHAR(100),
+        IN p_fee INT
+    )
+    INSERT INTO expert_profiles (user_id, specialty, location, format, availability, fee) 
+    VALUES (p_user_id, p_specialty, p_location, p_format, p_availability, p_fee)
+    ON DUPLICATE KEY UPDATE 
+    specialty = p_specialty, location = p_location, format = p_format, availability = p_availability, fee = p_fee
+  `);
 }
 
 async function initializeDatabaseSchema() {

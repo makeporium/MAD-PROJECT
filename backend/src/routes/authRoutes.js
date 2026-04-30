@@ -6,7 +6,12 @@ const sequelize = require("../config/database");
 
 const router = express.Router();
 
-const schema = z.object({ idToken: z.string().min(20) });
+const schema = z.object({ idToken: z.string().min(20) }); //if not using z, then we have to do below. 
+/**
+    *if (!idToken || typeof idToken !== "string" || idToken.length < 20) {
+    *return res.status(400).json({ message: "Invalid idToken" });
+  }
+ */
 
 router.post("/google", async (req, res) => {
   try {

@@ -20,7 +20,6 @@ router.post("/ai-search", async (req, res) => {
     const { prompt } = req.body;
     if (!prompt) return res.status(400).json({ error: "Prompt is required" });
 
-    // Ensure GEMINI_API_KEY is available
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server." });
     }

@@ -55,6 +55,9 @@ router.post("/:id/book", async (req, res) => {
     const userId = req.user.sub;
     const eventId = req.params.id;
 
+    // OLD CODE: Executed a SELECT and INSERT sequentially without locking, creating a race condition risk.
+    // NEW CODE: Wraps the read-then-write sequence in a database transaction to ensure atomicity and prevent double-booking.
+    /*
     // Check if already booked
     const [existing] = await sequelize.query(
       "SELECT id FROM event_bookings WHERE event_id = ? AND user_id = ?",
@@ -68,6 +71,28 @@ router.post("/:id/book", async (req, res) => {
       "INSERT INTO event_bookings (event_id, user_id) VALUES (?, ?)",
       { replacements: [eventId, userId] }
     );
+    */
+    
+    const t = await sequelize.transaction();
+    try {
+      const [existing] = await sequelize.query(
+        "SELECT id FROM event_bookings WHERE event_id = ? AND user_id = ? FOR UPDATE",
+        { replacements: [eventId, userId], transaction: t }
+      );
+      if (existing.length > 0) {
+        await t.rollback();
+        return res.status(400).json({ error: "Already booked this session." });
+      }
+
+      await sequelize.query(
+        "INSERT INTO event_bookings (event_id, user_id) VALUES (?, ?)",
+        { replacements: [eventId, userId], transaction: t }
+      );
+      await t.commit();
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
     res.status(201).json({ message: "Session booked successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -114,6 +139,9 @@ router.post("/expert-profile", async (req, res) => {
       return res.status(403).json({ error: "Only experts can create expert profiles." });
     }
 
+    // OLD CODE: Made separate queries to check for existing profile and then issue an INSERT or UPDATE from Node.js.
+    // NEW CODE: Calls a Stored Procedure 'upsert_expert_profile' to handle all logic in a single trip to the database.
+    /*
     // Upsert profile
     const [existing] = await sequelize.query("SELECT id FROM expert_profiles WHERE user_id = ?", {
       replacements: [userId],
@@ -129,6 +157,11 @@ router.post("/expert-profile", async (req, res) => {
         { replacements: [userId, specialty, location, format, availability, fee] }
       );
     }
+    */
+    await sequelize.query(
+      "CALL upsert_expert_profile(?, ?, ?, ?, ?, ?)",
+      { replacements: [userId, specialty, location, format, availability, fee] }
+    );
     res.status(200).json({ message: "Expert profile saved successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -138,10 +171,17 @@ router.post("/expert-profile", async (req, res) => {
 // GET all expert profiles
 router.get("/expert-profiles", async (_req, res) => {
   try {
+    // OLD CODE: Used an INNER JOIN directly inside the route to stitch the expert_profiles and users tables.
+    // NEW CODE: Uses the pre-compiled 'expert_directory' View, abstracting the complexity away from the application code.
+    /*
     const [rows] = await sequelize.query(
       `SELECT ep.*, u.name as expert_name, u.avatar_url 
        FROM expert_profiles ep 
        JOIN users u ON ep.user_id = u.id`
+    );
+    */
+    const [rows] = await sequelize.query(
+      `SELECT * FROM expert_directory`
     );
     res.status(200).json(rows);
   } catch (err) {

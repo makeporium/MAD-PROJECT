@@ -111,3 +111,14 @@ CREATE TABLE IF NOT EXISTS sos_alerts (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- =====================================================================
+-- ADDING PREVIOUSLY UNUSED SQL CONCEPTS (VIEWS, PROCEDURES, INDEXING)
+-- =====================================================================
+
+-- 1. Custom Indexing
+-- OLD CODE: No index existed on entry_date, meaning calendar queries had to perform full table scans.
+-- NEW CODE: Creates a B-Tree index on entry_date to drastically speed up date-based lookups.
+-- (NOTE: The actual CREATE INDEX command was moved to initDb.js to check if it exists first and prevent 'Duplicate key' crashes on server restart!)
+
+

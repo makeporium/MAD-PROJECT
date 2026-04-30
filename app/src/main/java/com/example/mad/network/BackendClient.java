@@ -19,7 +19,8 @@ import okhttp3.Response;
 public class BackendClient {
 
     // Emulator URL: http://10.0.2.2:5000
-    // Physical phone URL: use your laptop's local Wi-Fi IP, e.g. http://192.168.1.7:5000
+    // Physical phone URL: use laptop's local Wi-Fi IP, e.g.
+    // http://192.168.1.7:5000
     private static final String BASE_URL = "http://10.7.24.61:5000";
     private static final OkHttpClient client = new OkHttpClient();
     private static final String PREFS_NAME = "mad_prefs";
@@ -28,26 +29,31 @@ public class BackendClient {
 
     public interface HealthCallback {
         void onSuccess();
+
         void onError();
     }
 
     public interface AuthCallback {
         void onSuccess(String accessToken);
+
         void onError(String message);
     }
 
     public interface SimpleCallback {
         void onSuccess(String message);
+
         void onError(String message);
     }
 
     public interface JsonCallback {
         void onSuccess(JSONArray data);
+
         void onError(String message);
     }
 
     public interface ObjectCallback {
         void onSuccess(JSONObject data);
+
         void onError(String message);
     }
 
@@ -166,16 +172,28 @@ public class BackendClient {
             Request request = authorizedBuilder(context, "/api/auth/me").get().build();
             client.newCall(request).enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) { callback.onError("Network error: " + e.getMessage()); }
+                public void onFailure(Call call, IOException e) {
+                    callback.onError("Network error: " + e.getMessage());
+                }
+
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     String raw = response.body() != null ? response.body().string() : "";
                     response.close();
-                    if (!response.isSuccessful()) { callback.onError(extractErrorMessage(raw)); return; }
-                    try { callback.onSuccess(new JSONObject(raw)); } catch (Exception e) { callback.onError("Invalid backend response"); }
+                    if (!response.isSuccessful()) {
+                        callback.onError(extractErrorMessage(raw));
+                        return;
+                    }
+                    try {
+                        callback.onSuccess(new JSONObject(raw));
+                    } catch (Exception e) {
+                        callback.onError("Invalid backend response");
+                    }
                 }
             });
-        } catch (Exception e) { callback.onError("Client error: " + e.getMessage()); }
+        } catch (Exception e) {
+            callback.onError("Client error: " + e.getMessage());
+        }
     }
 
     public static void getTestimonials(Context context, JsonCallback callback) {
@@ -239,7 +257,8 @@ public class BackendClient {
         executeSimpleRequest(request, callback);
     }
 
-    public static void createSession(Context context, String title, String description, String date, String joinLink, SimpleCallback callback) {
+    public static void createSession(Context context, String title, String description, String date, String joinLink,
+            SimpleCallback callback) {
         try {
             JSONObject bodyJson = new JSONObject();
             bodyJson.put("title", title);
@@ -259,7 +278,8 @@ public class BackendClient {
         makeAuthorizedGetArray(context, "/api/events/my-sessions", callback);
     }
 
-    public static void createExpertProfile(Context context, String specialty, String location, String format, String availability, String fee, SimpleCallback callback) {
+    public static void createExpertProfile(Context context, String specialty, String location, String format,
+            String availability, String fee, SimpleCallback callback) {
         try {
             JSONObject bodyJson = new JSONObject();
             bodyJson.put("specialty", specialty);
@@ -278,7 +298,8 @@ public class BackendClient {
     }
 
     private static String normalizeDecimal(String value) {
-        if (value == null) return "";
+        if (value == null)
+            return "";
         String cleaned = value.replaceAll("[^0-9.]", "");
         int firstDot = cleaned.indexOf('.');
         if (firstDot >= 0) {
@@ -330,7 +351,8 @@ public class BackendClient {
         makeAuthorizedGetArray(context, "/api/community/rooms/" + roomId + "/messages", callback);
     }
 
-    public static void sendRoomMessage(Context context, long roomId, String message, boolean isAnonymous, SimpleCallback callback) {
+    public static void sendRoomMessage(Context context, long roomId, String message, boolean isAnonymous,
+            SimpleCallback callback) {
         try {
             JSONObject bodyJson = new JSONObject();
             bodyJson.put("message", message);
@@ -381,6 +403,7 @@ public class BackendClient {
     public static void getAiHistory(Context context, JsonCallback callback) {
         makeAuthorizedGetArray(context, "/api/support/ai/history", callback);
     }
+
     public static void sendSos(Context context, SimpleCallback callback) {
         Request request = authorizedBuilder(context, "/api/support/sos")
                 .post(RequestBody.create("{}", JSON))
@@ -403,7 +426,8 @@ public class BackendClient {
         }
     }
 
-    public static void updateReminder(Context context, long reminderId, String title, String remindAt, SimpleCallback callback) {
+    public static void updateReminder(Context context, long reminderId, String title, String remindAt,
+            SimpleCallback callback) {
         try {
             JSONObject bodyJson = new JSONObject();
             bodyJson.put("title", title);

@@ -9,6 +9,8 @@ const messageSchema = z.object({ message: z.string().min(1).max(300), isAnonymou
 router.use(auth);
 
 router.get("/rooms", async (_req, res) => {
+  /*
+  // OLD CODE: Grouped rooms by participants but returned all rooms.
   const [rows] = await sequelize.query(`
     SELECT r.id, r.name, r.description, r.created_by,
            COUNT(DISTINCT m.user_id) as participants_count,
@@ -17,6 +19,21 @@ router.get("/rooms", async (_req, res) => {
     FROM community_rooms r
     LEFT JOIN community_messages m ON r.id = m.room_id
     GROUP BY r.id, r.name, r.description, r.created_by
+    ORDER BY participants_count DESC, r.id
+  `);
+  */
+
+  // NEW CODE: Demonstrates a HAVING clause after GROUP BY. 
+  // We use >= 0 so we don't accidentally hide newly created, empty rooms!
+  const [rows] = await sequelize.query(`
+    SELECT r.id, r.name, r.description, r.created_by,
+           COUNT(DISTINCT m.user_id) as participants_count,
+           MAX(m.created_at) as last_message_at,
+           (SELECT message FROM community_messages WHERE room_id = r.id ORDER BY created_at DESC LIMIT 1) as last_message
+    FROM community_rooms r
+    LEFT JOIN community_messages m ON r.id = m.room_id
+    GROUP BY r.id, r.name, r.description, r.created_by
+    HAVING participants_count >= 0
     ORDER BY participants_count DESC, r.id
   `);
   res.status(200).json(rows);
